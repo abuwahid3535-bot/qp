@@ -2,15 +2,20 @@
 $pageTitle = 'Home';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/header.php';
+
+$principalImg = __DIR__ . '/' . PRINCIPAL_PHOTO;
+$corrImg      = __DIR__ . '/' . CORRESPONDENT_PHOTO;
+$collegeImg   = __DIR__ . '/' . COLLEGE_IMAGE;
 ?>
 
 <div class="hero mb-4">
     <div class="row align-items-center g-4">
         <div class="col-lg-7">
-            <h1 class="display-5 fw-bold mb-3">Previous Year Question Papers, all in one place.</h1>
+            <span class="badge rounded-pill text-bg-light mb-3"><?= e(APP_NAME); ?></span>
+            <h1 class="display-5 fw-bold mb-3"><?= e(COLLEGE_NAME); ?></h1>
             <p class="fs-5 mb-4">
-                <?= e(APP_NAME); ?> lets <strong>staff members</strong> upload previous year question papers
-                for every course, specialisation and subject, and lets <strong>students</strong> download
+                Access previous year question papers for every course, specialisation and subject.
+                <strong>Staff members</strong> upload papers, and <strong>students</strong> download
                 them anytime with just a few clicks.
             </p>
             <div class="d-flex gap-2 flex-wrap">
@@ -23,7 +28,12 @@ require_once __DIR__ . '/includes/header.php';
             </div>
         </div>
         <div class="col-lg-5 text-center d-none d-lg-block">
-            <i class="bi bi-file-earmark-pdf-fill" style="font-size:9rem;opacity:.9;"></i>
+            <?php if (is_file($collegeImg)): ?>
+                <img src="<?= COLLEGE_IMAGE; ?>" alt="<?= e(COLLEGE_NAME); ?>"
+                     class="img-fluid rounded-4 shadow-lg" style="max-height:280px;object-fit:cover;">
+            <?php else: ?>
+                <i class="bi bi-file-earmark-pdf-fill" style="font-size:9rem;opacity:.9;"></i>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -67,6 +77,41 @@ require_once __DIR__ . '/includes/header.php';
                     <a href="login.php?role=staff" class="btn btn-app-primary">Staff Login</a>
                     <a href="register.php?role=staff" class="btn btn-outline-secondary">Staff Registration</a>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 justify-content-center mb-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="card leadership-card h-100">
+            <div class="card-body text-center p-4">
+                <span class="badge text-bg-primary mb-2">Principal</span>
+                <div class="mx-auto mb-3">
+                    <?php if (is_file($principalImg)): ?>
+                        <img src="<?= PRINCIPAL_PHOTO; ?>" alt="Principal <?= e(PRINCIPAL_NAME); ?>" class="leadership-photo">
+                    <?php else: ?>
+                        <i class="bi bi-person-circle leadership-icon"></i>
+                    <?php endif; ?>
+                </div>
+                <h3 class="h5 fw-bold mb-0"><?= e(PRINCIPAL_NAME); ?></h3>
+                <p class="text-muted mb-0">Principal</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-5">
+        <div class="card leadership-card h-100">
+            <div class="card-body text-center p-4">
+                <span class="badge text-bg-primary mb-2">Correspondent</span>
+                <div class="mx-auto mb-3">
+                    <?php if (is_file($corrImg)): ?>
+                        <img src="<?= CORRESPONDENT_PHOTO; ?>" alt="Correspondent <?= e(CORRESPONDENT_NAME); ?>" class="leadership-photo">
+                    <?php else: ?>
+                        <i class="bi bi-person-circle leadership-icon"></i>
+                    <?php endif; ?>
+                </div>
+                <h3 class="h5 fw-bold mb-0"><?= e(CORRESPONDENT_NAME); ?></h3>
+                <p class="text-muted mb-0">Correspondent</p>
             </div>
         </div>
     </div>
