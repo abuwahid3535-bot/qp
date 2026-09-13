@@ -1,0 +1,99 @@
+:root {
+    --app-primary: #4f46e5;
+    --app-primary-dark: #3730a3;
+    --app-accent: #0ea5e9;
+    --app-staff: #f59e0b;
+    --app-student: #10b981;
+    --app-bg: #f4f6fb;
+}
+
+body {
+    background: var(--app-bg);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    color: #1f2937;
+}
+
+/* ---------- Navbar ---------- */
+.app-navbar {
+    background: linear-gradient(90deg, var(--app-primary-dark) 0%, var(--app-primary) 60%, var(--app-accent) 100%);
+}
+.app-navbar .nav-link { color: rgba(255,255,255,.85); }
+.app-navbar .nav-link:hover { color: #fff; }
+.navbar-text { color: rgba(255,255,255,.9); }
+
+/* ---------- Hero (landing) ---------- */
+.hero {
+    border-radius: 1rem;
+    background: linear-gradient(135deg, var(--app-primary-dark) 0%, var(--app-primary) 55%, var(--app-accent) 100%);
+    color: #fff;
+    padding: 3.5rem 2rem;
+    overflow: hidden;
+    position: relative;
+}
+.hero::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    top: -80px;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+}
+.hero .btn { position: relative; z-index: 1; }
+
+/* ---------- Role cards ---------- */
+.role-card {
+    border: none;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(79, 70, 229, .08);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.role-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(79,70,229,.14); }
+.role-card .role-icon {
+    width: 64px; height: 64px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 1rem; font-size: 1.8rem; color: #fff;
+}
+.role-icon.staff { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+.role-icon.student { background: linear-gradient(135deg, #10b981, #0ea5e9); }
+.role-badge-staff { background: #f59e0b; color: #fff; }
+.role-badge-student { background: #10b981; color: #fff; }
+
+/* ---------- Cards & forms ---------- */
+.card { border: none; border-radius: 1rem; box-shadow: 0 6px 20px rgba(31,41,55,.06); }
+.card-header { border-radius: 1rem 1rem 0 0 !important; }
+.form-control:focus, .form-select:focus { border-color: var(--app-primary); box-shadow: 0 0 0 .2rem rgba(79,70,229,.15); }
+
+.btn-app-primary { background: var(--app-primary); border-color: var(--app-primary); color: #fff; }
+.btn-app-primary:hover { background: var(--app-primary-dark); border-color: var(--app-primary-dark); color: #fff; }
+
+.otp-code {
+    font-family: Consolas, monospace;
+    font-size: 2rem;
+    letter-spacing: .5rem;
+    background: #eef2ff;
+    border: 2px dashed var(--app-primary);
+    border-radius: .75rem;
+    color: var(--app-primary-dark);
+    padding: .5rem 1rem;
+    display: inline-block;
+}
+
+.auth-form { max-width: 520px; margin: 0 auto; }
+
+/* ---------- Tables ---------- */
+.table > :not(caption) > * > * { vertical-align: middle; }
+.paper-title-link { color: var(--app-primary); font-weight: 600; text-decoration: none; }
+.paper-title-link:hover { text-decoration: underline; }
+
+/* ---------- Footer ---------- */
+.footer { background: #111827; }
+
+.stat-tile {
+    border-radius: .9rem;
+    color: #fff;
+    padding: 1.1rem 1.25rem;
+}
+.stat-tile .num { font-size: 1.7rem; font-weight: 700; }
