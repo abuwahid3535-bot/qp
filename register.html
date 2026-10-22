@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
 
@@ -28,21 +28,21 @@
         <div class="logo-area">
             <div class="header-profiles">
                 <div class="profile-item">
-                    <img src="css/svu1.PNG" alt="SV University" class="svu-symbol">
+                    <img src="/assets/img/college.jpg" alt="SV University" class="svu-symbol" onerror="this.style.display='none'; this.parentNode.innerText='SVU';">
                 </div>
                 <div class="profile-item" onclick="openCorrespondentBioModal()">
-                    <img src="css/chair.png" alt="MR. Ravindra Babu">
+                    <img src="/assets/img/correspondent.jpg" alt="MR. Ravindra Babu">
                     <span>MR. Ravindra babu<br>(Correspondent)</span>
                 </div>
                 <div class="profile-item" onclick="openChairmanBioModal()">
-                    <img src="assets/img/correspondent.jpg" alt="MR. Sunil">
+                    <img src="/assets/img/principal.png" alt="MR. Sunil">
                     <span>MR. Sunil<br>(Chairman)</span>
                 </div>
             </div>
             
             <!-- COLLEGE LOGO -->
             <div class="logo">
-                <img src="assets/img/college.jpg" alt="Mother Theresa Logo" onerror="this.style.display='none'; this.parentNode.innerText='MT';">
+                <img src="/assets/img/college.jpg" alt="Mother Theresa Logo" onerror="this.style.display='none'; this.parentNode.innerText='MT';">
             </div>
 
             <div class="college-name">
@@ -100,7 +100,6 @@
                             <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                             <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required>
                         </div>
-                        <div class="form-text">An OTP will be sent to this email for verification.</div>
                     </div>
 
                     <div class="mb-3">
@@ -109,7 +108,6 @@
                             <span class="input-group-text"><i class="bi bi-phone"></i></span>
                             <input type="tel" class="form-control" id="mobile" name="mobile" maxlength="10" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
                         </div>
-                        <div class="form-text">An OTP will be sent to this number via SMS for verification.</div>
                     </div>
 
                     <div class="row">
@@ -125,7 +123,7 @@
                     </div>
 
                     <div class="d-grid mt-3">
-                        <button type="submit" class="btn btn-accent btn-block btn-lg"><i class="bi bi-check-circle"></i> Register & Verify</button>
+                        <button type="submit" class="btn btn-accent btn-block btn-lg"><i class="bi bi-check-circle"></i> Register</button>
                     </div>
                 </form>
             </div>
@@ -190,13 +188,13 @@
             });
         });
 
-        // Registration form handler
+        // Registration form handler - Direct register without OTP
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const btn = this.querySelector('button[type="submit"]');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Registering...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Creating Account...';
             btn.disabled = true;
 
             const formData = new FormData(this);
@@ -217,7 +215,7 @@
                 return;
             }
 
-            // Simulate registration & OTP sending
+            // Direct registration - save user and redirect to login
             setTimeout(() => {
                 const userData = {
                     name: formData.get('name'),
@@ -225,28 +223,33 @@
                     mobile: formData.get('mobile'),
                     password: password, // In real app, this would be hashed
                     role: formData.get('role'),
-                    email_verified: false,
-                    mobile_verified: false,
+                    email_verified: true,
+                    mobile_verified: true,
                     created_at: new Date().toISOString()
                 };
 
-                // Generate demo OTPs (in real app, these would be sent via email/SMS)
-                const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
-                const mobileOTP = Math.floor(100000 + Math.random() * 900000).toString();
-
-                // Store pending registration with OTPs
-                sessionStorage.setItem('mt_pending_user', JSON.stringify(userData));
-                sessionStorage.setItem('mt_email_otp', emailOTP);
-                sessionStorage.setItem('mt_mobile_otp', mobileOTP);
-                sessionStorage.setItem('mt_otp_expires', Date.now() + 10 * 60 * 1000); // 10 minutes
-
-                // In DEV mode, show OTPs in console/alert
-                console.log('DEV MODE - Email OTP:', emailOTP);
-                console.log('DEV MODE - Mobile OTP:', mobileOTP);
+                // Save user to localStorage (simulating database)
+                const users = JSON.parse(localStorage.getItem('mt_users') || '[]');
                 
-                // Redirect to verification page
-                window.location.href = 'verify.html';
-            }, 1000);
+                // Check if email already exists
+                if (users.find(u => u.email === userData.email)) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert('Email already registered. Please login.');
+                    return;
+                }
+                
+                users.push(userData);
+                localStorage.setItem('mt_users', JSON.stringify(users));
+
+                // Auto-login after registration
+                sessionStorage.setItem('mt_user', JSON.stringify(userData));
+                sessionStorage.setItem('mt_logged_in', 'true');
+
+                // Redirect based on role
+                const targetUrl = userData.role === 'staff' ? 'staff/manage.html' : 'student/dashboard.html';
+                window.location.href = targetUrl;
+            }, 800);
         });
 
         // Password match validation
@@ -267,7 +270,7 @@
             <button class="modal-close" type="button" onclick="closePrincipalBioModal()">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <img src="assets/img/prin.jfif" alt="Principal" class="bio-modal-img">
+            <img src="/assets/img/principal.png" alt="Principal" class="bio-modal-img">
             <h2>Principal</h2>
             <div class="bio-subtitle">Principal</div>
             <div class="bio-text">
@@ -286,7 +289,7 @@ As Principal, he provides academic and administrative leadership to the institut
             <button class="modal-close" type="button" onclick="closeCorrespondentBioModal()">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <img src="assets/img/chair.png" alt="MR. Ravindra Babu" class="bio-modal-img">
+            <img src="/assets/img/correspondent.jpg" alt="MR. Ravindra Babu" class="bio-modal-img">
             <h2>MR. Ravindra Babu</h2>
             <div class="bio-subtitle">Correspondent</div>
             <div class="bio-text">
@@ -301,7 +304,7 @@ As Principal, he provides academic and administrative leadership to the institut
             <button class="modal-close" type="button" onclick="closeChairmanBioModal()">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <img src="assets/img/corres.jpg" alt="MR. Sunil" class="bio-modal-img">
+            <img src="/assets/img/principal.png" alt="MR. Sunil" class="bio-modal-img">
             <h2>MR. Sunil</h2>
             <div class="bio-subtitle">Chairman</div>
             <div class="bio-text">
