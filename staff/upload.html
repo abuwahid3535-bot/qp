@@ -1,0 +1,433 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Question Paper - Mother Theresa Degree College</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <!-- ================= TOP BAR ================= -->
+    <div class="top-bar">
+        <div>
+            <span><i class="fa-solid fa-phone"></i> 08579-268585</span>
+            <span><i class="fa-solid fa-envelope"></i> mtidegree@gmail.com</span>
+        </div>
+        <div>
+            <span><i class="fa-solid fa-graduation-cap"></i> Previous Year Question Papers Portal</span>
+        </div>
+    </div>
+
+    <!-- ================= HEADER ================= -->
+    <header>
+        <div class="logo-area">
+            <div class="header-profiles">
+                <div class="profile-item">
+                    <img src="../assets/img/college.jpg" alt="SV University" class="svu-symbol" onerror="this.style.display='none'; this.parentNode.innerText='SVU';">
+                </div>
+                <div class="profile-item" onclick="openCorrespondentBioModal()">
+                    <img src="../assets/img/correspondent.jpg" alt="MR. Ravindra Babu">
+                    <span>MR. Ravindra babu<br>(Correspondent)</span>
+                </div>
+                <div class="profile-item" onclick="openChairmanBioModal()">
+                    <img src="../assets/img/principal.png" alt="MR. Sunil">
+                    <span>MR. Sunil<br>(Chairman)</span>
+                </div>
+            </div>
+            
+            <div class="logo">
+                <img src="../assets/img/college.jpg" alt="Mother Theresa Logo" onerror="this.style.display='none'; this.parentNode.innerText='MT';">
+            </div>
+
+            <div class="college-name">
+                <h2>Mother Theresa Degree College</h2>
+                <p>Previous Year Question Papers Portal</p>
+            </div>
+        </div>
+
+        <div class="nav-right-container">
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="#papers">Question Papers</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card">
+                <div class="card-header bg-white py-3 d-flex align-items-center">
+                    <i class="bi bi-cloud-arrow-up fs-4 me-2 text-primary"></i>
+                    <div>
+                        <h2 class="h5 fw-bold mb-0">Upload a Question Paper</h2>
+                        <span class="text-muted small">Select the course, academic year, sub-course and subject of the paper.</span>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" action="upload.html" enctype="multipart/form-data" novalidate>
+                        <input type="hidden" name="csrf_token" value="token">
+
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" for="course_id">Course</label>
+                                <select class="form-select" name="course_id" id="course_id" required>
+                                    <option value="">-- Select course --</option>
+                                    <option value="1">B.Com</option>
+                                    <option value="2">B.Sc</option>
+                                    <option value="3">BCA</option>
+                                    <option value="4">BBA</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" for="subcourse_id">Sub-Course (Specialisation)</label>
+                                <select class="form-select" name="subcourse_id" id="subcourse_id" required>
+                                    <option value="">-- Select sub-course --</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" for="semester">Semester</label>
+                                <select class="form-select" name="semester" id="semester" required>
+                                    <option value="">-- Semester --</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold" for="subject_id">Subject</label>
+                                <select class="form-select" name="subject_id" id="subject_id" required>
+                                    <option value="">-- Select subject --</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold" for="title">Title <span class="text-muted fw-normal">(optional)</span></label>
+                                <input type="text" class="form-control" id="title" name="title"
+                                       placeholder="e.g. Programming in C - Semester End Examination - 2024-2025">
+                                <div class="form-text">Leave blank to auto-generate from the subject, semester and year.</div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold" for="description">Short description <span class="text-muted fw-normal">(optional)</span></label>
+                                <textarea class="form-control" id="description" name="description" rows="3"
+                                          placeholder="e.g. Semester end examination paper, held in May 2025"></textarea>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold" for="paper_file">Question paper PDF</label>
+                                <input type="file" class="form-control" id="paper_file"
+                                       name="paper_file" accept=".pdf,application/pdf" required>
+                                <div class="form-text">Only PDF files up to 10 MB are allowed.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-app-primary btn-lg">
+                                <i class="bi bi-cloud-arrow-up"></i> Upload Paper
+                            </button>
+                            <a href="dashboard.html" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <div class="footer-grid">
+            <div>
+                <h3>Mother Theresa Degree College</h3>
+                <p>Mother Theresa Degree College is an educational institution providing undergraduate education to students.</p>
+            </div>
+            <div>
+                <h3>Quick Links</h3>
+                <a href="index.html">Home</a>
+                <a href="#courses">Courses</a>
+                <a href="#papers">Question Papers</a>
+            </div>
+            <div>
+                <h3>Contact Info</h3>
+                <p><i class="fa-solid fa-phone"></i> 08579-268585</p>
+                <p><i class="fa-solid fa-envelope"></i> mtidegree@gmail.com</p>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; Mother Theresa Degree College. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        function openLoginModal() { document.getElementById('loginRequiredModal').classList.add('show'); }
+        function closeLoginModal() { document.getElementById('loginRequiredModal').classList.remove('show'); }
+
+        function openPrincipalBioModal() { document.getElementById('principalBioModal').classList.add('show'); }
+        function closePrincipalBioModal() { document.getElementById('principalBioModal').classList.remove('show'); }
+
+        function openCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.add('show'); }
+        function closeCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.remove('show'); }
+
+        function openChairmanBioModal() { document.getElementById('chairmanBioModal').classList.add('show'); }
+        function closeChairmanBioModal() { document.getElementById('chairmanBioModal').classList.remove('show'); }
+
+        // Close modals on clicking outside
+        window.addEventListener('click', function (event) {
+            const modals = document.querySelectorAll('.login-modal, .bio-modal');
+            modals.forEach(function (modal) {
+                if (event.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+    </script>
+
+    <!-- ================= PRINCIPAL BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="principalBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closePrincipalBioModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img src="../assets/img/principal.png" alt="Principal" class="bio-modal-img">
+            <h2>Principal</h2>
+            <div class="bio-subtitle">Principal</div>
+            <div class="bio-text">
+                <p>Sri S. Madhusudhana Rao is the Principal of Mother Theresa Degree College (MTDC), Palamaner. He is an experienced educationist with around 25 years of experience in the field of education.
+
+He holds an M.Sc. in Mathematics and an M.Phil. from M.K. University, along with a B.Ed. His academic background and extensive experience reflect his commitment to education and continuous learning.
+
+As Principal, he provides academic and administrative leadership to the institution and works towards creating a supportive environment for students and faculty.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CORRESPONDENT BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="correspondentBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closeCorrespondentBioModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img src="../assets/img/correspondent.jpg" alt="MR. Ravindra Babu" class="bio-modal-img">
+            <h2>MR. Ravindra Babu</h2>
+            <div class="bio-subtitle">Correspondent</div>
+            <div class="bio-text">
+                <p>The pursuit of money as an end in itself is making people greedy and excessively commercial minded. Our aim is to provide professionals who should be pure in thought, word and deed, with integrity and character...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CHAIRMAN BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="chairmanBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closeChairmanBioModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img src="../assets/img/principal.png" alt="MR. Sunil" class="bio-modal-img">
+            <h2>MR. Sunil</h2>
+            <div class="bio-subtitle">Chairman</div>
+            <div class="bio-text">
+                <p>It is a social obligation to make society happy, content, flourish and should be achieved through higher education, the knowledge hub to be made available and use by students...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= LOGIN REQUIRED MODAL ================= -->
+    <div class="login-modal" id="loginRequiredModal">
+        <div class="login-modal-box">
+            <button class="modal-close" type="button" onclick="closeLoginModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="login-modal-icon">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2>Login Required</h2>
+            <p>Please login to <strong>view or download</strong> question papers.</p>
+            <div class="modal-login-buttons">
+                <a href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+            </div>
+        </div>
+    </div>
+
+<!-- ================= SUBCOURSE DATA & LOGIC ================= -->
+    <script>
+        // Subcourse data matching database
+        const subcourseData = {
+            '1': [ // B.Com
+                { id: 1, name: 'General' }
+            ],
+            '2': [ // B.Sc
+                { id: 2, name: 'Computer Science' },
+                { id: 3, name: 'Data Science' }
+            ],
+            '3': [ // BCA
+                { id: 4, name: 'General' }
+            ],
+            '4': [ // BBA
+                { id: 6, name: 'General' }
+            ]
+        };
+
+        // Populate subcourses when course changes
+        function initSubcourseLogic() {
+            console.log('Initializing subcourse logic');
+            
+            const courseSelect = document.getElementById('course_id');
+            const subcourseSelect = document.getElementById('subcourse_id');
+            const subjectSelect = document.getElementById('subject_id');
+            
+            console.log('Elements found:', { courseSelect, subcourseSelect, subjectSelect });
+            
+            if (!courseSelect) {
+                console.error('course_id element not found!');
+                return;
+            }
+            
+            // Populate subcourses based on current course value (in case of page refresh with value)
+            const initialCourseId = courseSelect.value;
+            if (initialCourseId && subcourseData[initialCourseId]) {
+                console.log('Populating subcourses for initial course:', initialCourseId);
+                subcourseData[initialCourseId].forEach(sc => {
+                    const opt = document.createElement('option');
+                    opt.value = sc.id;
+                    opt.textContent = sc.name;
+                    document.getElementById('subcourse_id').appendChild(opt);
+                });
+            }
+            
+            courseSelect.addEventListener('change', function() {
+                console.log('Course changed to:', this.value);
+                const courseId = this.value;
+                
+                const subcourseSelect = document.getElementById('subcourse_id');
+                const subjectSelect = document.getElementById('subject_id');
+                
+                // Reset subcourses
+                subcourseSelect.innerHTML = '<option value="">-- Select sub-course --</option>';
+                subcourseSelect.disabled = false;
+                
+                // Reset subjects
+                subjectSelect.innerHTML = '<option value="">-- Select subject --</option>';
+                subjectSelect.disabled = true;
+                
+                if (courseId && subcourseData[courseId]) {
+                    console.log('Populating subcourses for course:', courseId);
+                    subcourseData[courseId].forEach(sc => {
+                        const opt = document.createElement('option');
+                        opt.value = sc.id;
+                        opt.textContent = sc.name;
+                        subcourseSelect.appendChild(opt);
+                    });
+                } else if (!courseId) {
+                    subcourseSelect.disabled = true;
+                    subjectSelect.disabled = true;
+                }
+            });
+
+            // Populate subjects when subcourse or semester changes
+            document.getElementById('subcourse_id').addEventListener('change', function() {
+                console.log('Subcourse changed:', this.value);
+                loadSubjects(this.value, document.getElementById('semester') ? document.getElementById('semester').value : '');
+            });
+
+            document.getElementById('semester').addEventListener('change', function() {
+                console.log('Semester changed:', this.value);
+                loadSubjects(document.getElementById('subcourse_id') ? document.getElementById('subcourse_id').value : '', this.value);
+            });
+        }
+
+        // Initialize immediately if DOM is ready, otherwise wait for DOMContentLoaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSubcourseLogic);
+        } else {
+            initSubcourseLogic();
+        }
+
+        // Subject data matching database
+        const subjectData = {
+                '1': [ // B.Com General
+                    { id: 1, code: 'CO101', name: 'Financial Accounting' },
+                    { id: 2, code: 'CO102', name: 'Business Laws' },
+                    { id: 3, code: 'CO201', name: 'Corporate Accounting' },
+                    { id: 4, code: 'CO301', name: 'Cost Accounting' },
+                    { id: 5, code: 'CO302', name: 'Taxation' }
+                ],
+                '2': [ // Computer Science (B.Sc)
+                    { id: 11, code: 'CS101', name: 'Programming in C' },
+                    { id: 12, code: 'CS201', name: 'Data Structures' },
+                    { id: 13, code: 'CS301', name: 'Database Management Systems' },
+                    { id: 14, code: 'CS401', name: 'Operating Systems' },
+                    { id: 15, code: 'CS402', name: 'Real Analysis' }
+                ],
+                '3': [ // Data Science (B.Sc) - new
+                    { id: 16, code: 'DS101', name: 'Introduction to Data Science' },
+                    { id: 17, code: 'DS201', name: 'Machine Learning Fundamentals' },
+                    { id: 18, code: 'DS301', name: 'Deep Learning' },
+                    { id: 19, code: 'DS401', name: 'Big Data Analytics' }
+                ],
+                '4': [ // BCA General
+                    { id: 10, code: 'CA101', name: 'Programming in C' },
+                    { id: 11, code: 'CA102', name: 'Digital Computer Fundamentals' },
+                    { id: 12, code: 'CA201', name: 'Data Structures' },
+                    { id: 13, code: 'CA202', name: 'Database Management Systems' },
+                    { id: 13, code: 'CA301', name: 'Operating Systems' },
+                    { id: 14, code: 'CA302', name: 'Computer Networks' },
+                    { id: 14, code: 'CA401', name: 'Web Technologies' },
+                    { id: 14, code: 'CA402', name: 'Software Engineering' }
+                ],
+                '6': [ // BBA General
+                    { id: 19, code: 'BB101', name: 'Principles of Management' },
+                    { id: 20, code: 'BB201', name: 'Organisational Behaviour' },
+                    { id: 21, code: 'BB301', name: 'Business Environment' }
+                ]
+            };
+
+            function loadSubjects(subcourseId, semester) {
+                console.log('loadSubjects called with:', subcourseId, semester);
+                const subjectSelectEl = document.getElementById('subject_id');
+                
+                if (!subcourseId) {
+                    subjectSelectEl.innerHTML = '<option value="">-- Select Subject --</option>';
+                    subjectSelectEl.disabled = true;
+                    return;
+                }
+                
+                subjectSelectEl.innerHTML = '<option value="">Loading...</option>';
+                subjectSelectEl.disabled = false;
+                
+                setTimeout(() => {
+                    const subjects = getSubjects(subcourseId, semester);
+                    console.log('Subjects:', subjects);
+                    subjectSelectEl.innerHTML = '<option value="">-- Select Subject --</option>';
+                    subjects.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.id;
+                        opt.textContent = s.name + (s.semester ? ` (Sem ${s.semester})` : '');
+                        subjectSelectEl.appendChild(opt);
+                    });
+                }, 300);
+            }
+
+            function getSubjects(subcourseId, semesterFilter = '') {
+                console.log('getSubjects called with:', subcourseId, semesterFilter);
+                const subjects = subjectData[subcourseId] || [];
+                console.log('Raw subjects:', subjects);
+                
+                const result = subjects.map(s => ({
+                    ...s,
+                    semester: parseInt(s.code.charAt(2)) || null
+                })).filter(s => !semesterFilter || s.semester == semesterFilter);
+                console.log('Filtered subjects:', result);
+                return result;
+            }
+    </script>
+</body>
+</html>

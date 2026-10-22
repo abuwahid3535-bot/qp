@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mother Theresa Degree College - Previous Year Question Papers</title>
+
+    <meta name="description" content="Browse and download previous year question papers, check exam results, and explore resources from Mother Theresa Degree College.">
+    <meta property="og:title" content="Mother Theresa Degree College | Student Portal">
+    <meta property="og:type" content="website">
+    <meta property="og:description" content="Question papers, exam results, and college resources in one place.">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+    <!-- ================= GOOGLE FONT ================= -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- ================= FONT AWESOME ================= -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- ================= CSS ================= -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        html {
+            width: 100%;
+            min-height: 100%;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background: #f5f8ff;
+            color: #222;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ================= TOP BAR ================= */
+        .top-bar {
+            background: #062b63;
+            color: white;
+            padding: 8px 3%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .top-bar span {
+            margin-right: 20px;
+        }
+
+        /* ================= HEADER ================= */
+        header {
+            background: white;
+            padding: 10px 2% 10px 3%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* ================= LOGO AREA & PROFILES ================= */
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-profiles {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-right: 12px;
+            border-right: 2px solid #e0e0e0;
+        }
+
+        .header-profiles-right {
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            margin: 0;
+            border-left: 2px solid #e0e0e0;
+        }
+
+        .profile-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .profile-item:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-item img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #0b4ea2;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
+
+        .profile-item img.svu-symbol {
+            border-radius: 8px;
+            object-fit: contain;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+        .profile-item span {
+            font-size: 10px;
+            font-weight: 600;
+            color: #062b63;
+            margin-top: 2px;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+
+        /* LOGO STYLES */
+        .logo {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid #0b4ea2;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+            background: #062b63;
+            color: #ffca28;
+            font-weight: 700;
+            font-size: 20px;
+            user-select: none;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .college-name h2 {
+            color: #062b63;
+            font-size: 19px;
+        }
+
+        .college-name p {
+            color: #777;
+            font-size: 11px;
+        }
+
+        /* ================= NAVIGATION ================= */
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #222;
+            margin-left: 10px;
+            margin-right: 10px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            color: #0b4ea2;
+        }
+
+        .nav-right-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ================= MARQUEE ================= */
+        .announcement {
+            background: #ffca28;
+            padding: 9px 0;
+            font-weight: 600;
+            color: #222;
+        }
+
+        .announcement i {
+            margin-right: 8px;
+        }
+
+        /* ================= HERO ================= */
+        .hero {
+            min-height: 500px;
+            background: linear-gradient(rgba(4, 35, 79, 0.70), rgba(4, 35, 79, 0.70)), url("degree.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 50px 20px;
+        }
+
+        .hero-content {
+            max-width: 900px;
+        }
+
+        .hero-content h1 {
+            font-size: 45px;
+            margin-bottom: 15px;
+        }
+
+        .hero-content h1 span {
+            color: #ffca28;
+        }
+
+        .hero-content p {
+            font-size: 17px;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .hero-buttons a {
+            display: inline-block;
+            padding: 13px 25px;
+            margin: 5px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .primary-btn {
+            background: #ffca28;
+            color: #222;
+        }
+
+        .primary-btn:hover {
+            background: white;
+        }
+
+        .secondary-btn {
+            border: 2px solid white;
+            color: white;
+        }
+
+        .secondary-btn:hover {
+            background: white;
+            color: #062b63;
+        }
+
+        /* ================= COMMON SECTION ================= */
+        .section {
+            padding: 60px 7%;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title h2 {
+            color: #062b63;
+            font-size: 30px;
+        }
+
+        .section-title p {
+            color: #777;
+            margin-top: 8px;
+        }
+
+        /* ================= COURSE CARDS ================= */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 22px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        }
+
+        .card i {
+            font-size: 35px;
+            color: #0b4ea2;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            color: #062b63;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            color: #777;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ================= QUESTION PAPERS ================= */
+        .papers {
+            background: #eef4ff;
+        }
+
+        .paper-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .paper {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+            overflow: hidden;
+        }
+
+        .paper-icon {
+            width: 50px;
+            height: 50px;
+            background: #e8f0ff;
+            color: #0b4ea2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            font-size: 22px;
+            float: left;
+            margin-right: 15px;
+        }
+
+        .paper h3 {
+            color: #062b63;
+            margin-bottom: 5px;
+            font-size: 17px;
+        }
+
+        .paper p {
+            color: #777;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .paper-buttons {
+            clear: both;
+            padding-top: 18px;
+        }
+
+        .paper-btn {
+            display: inline-block;
+            margin-right: 5px;
+            padding: 8px 13px;
+            background: #0b4ea2;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .paper-btn:hover {
+            background: #062b63;
+        }
+
+        /* ================= FEATURES ================= */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .feature {
+            background: white;
+            padding: 45px 30px;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.04);
+            transition: 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        .feature i {
+            font-size: 38px;
+            color: #0b4ea2;
+            margin-bottom: 20px;
+        }
+
+        .feature h3 {
+            color: #062b63;
+            margin-bottom: 12px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .feature p {
+            color: #777;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ================= ABOUT ================= */
+        .about {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .about-img {
+            width: 100%;
+            height: 320px;
+            background: #dbe4f0;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .about-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .about-content h2 {
+            color: #062b63;
+            font-size: 30px;
+            margin-bottom: 15px;
+        }
+
+        .about-content p {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        /* ================= FOOTER ================= */
+        footer {
+            background: #061f45;
+            color: #ffffff;
+            padding: 50px 7% 25px;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 40px;
+        }
+
+        footer h3 {
+            margin-bottom: 15px;
+            color: #ffca28;
+            font-size: 18px;
+        }
+
+        footer p,
+        footer a {
+            color: #d5dbea;
+            font-size: 14px;
+            line-height: 1.8;
+            text-decoration: none;
+        }
+
+        footer a {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        footer a:hover {
+            color: #ffffff;
+        }
+
+        .copyright {
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.15);
+            margin-top: 35px;
+            padding-top: 20px;
+            font-size: 13px;
+            color: #b9c2d5;
+        }
+
+        /* ================= MODALS ================= */
+        .login-modal, .bio-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            z-index: 5000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-modal.show, .bio-modal.show {
+            display: flex;
+        }
+
+        .login-modal-box, .bio-modal-box {
+            width: 100%;
+            max-width: 480px;
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.25);
+            position: relative;
+        }
+
+        .login-modal-icon {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            background: #e8f0ff;
+            color: #0b4ea2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .login-modal-box h2, .bio-modal-box h2 {
+            color: #062b63;
+            margin-bottom: 4px;
+        }
+
+        .bio-subtitle {
+            color: #ffca28;
+            background: #062b63;
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .bio-modal-img {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #0b4ea2;
+            margin-bottom: 15px;
+        }
+
+        .bio-text {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.7;
+            text-align: justify;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .modal-login-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .modal-login-buttons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 30px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            background: #0b4ea2;
+            color: white;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            border: none;
+            background: transparent;
+            color: #777;
+            font-size: 23px;
+            cursor: pointer;
+        }
+
+        /* ================= RESPONSIVE DESIGN ================= */
+        @media (max-width: 1000px) {
+            nav a {
+                margin-left: 6px;
+                margin-right: 6px;
+            }
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .paper-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 800px) {
+            .top-bar {
+                display: none;
+            }
+            header {
+                padding: 10px 3%;
+            }
+            nav {
+                display: none;
+            }
+            .about {
+                grid-template-columns: 1fr;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .header-profiles, .header-profiles-right {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .college-name h2 {
+                font-size: 15px;
+            }
+            .college-name p {
+                font-size: 10px;
+            }
+            .logo {
+                width: 48px;
+                height: 48px;
+            }
+            .hero {
+                min-height: 400px;
+            }
+            .hero-content h1 {
+                font-size: 28px;
+            }
+            .hero-content p {
+                font-size: 14px;
+            }
+            .cards, .paper-grid, .features, .footer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= PRINCIPAL BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="principalBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closePrincipalBioModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img src="prin.jfif" alt="Principal" class="bio-modal-img">
+            <h2>Principal</h2>
+            <div class="bio-subtitle">Principal</div>
+            <div class="bio-text">
+                <p>Sri S. Madhusudhana Rao is the Principal of Mother Theresa Degree College (MTDC), Palamaner. He is an experienced educationist with around 25 years of experience in the field of education.
+
+He holds an M.Sc. in Mathematics and an M.Phil. from M.K. University, along with a B.Ed. His academic background and extensive experience reflect his commitment to education and continuous learning.
+
+As Principal, he provides academic and administrative leadership to the institution and works towards creating a supportive environment for students and faculty.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CORRESPONDENT BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="correspondentBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closeCorrespondentBioModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img src="chair.png" alt="MR. Ravindra Babu" class="bio-modal-img">
+            <h2>MR. Ravindra Babu</h2>
+            <div class="bio-subtitle">Correspondent</div>
+            <div class="bio-text">
+                <p>The pursuit of money as an end in itself is making people greedy and excessively commercial minded. Our aim is to provide professionals who should be pure in thought, word and deed, with integrity and character...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CHAIRMAN BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="chairmanBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closeChairmanBioModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img src="corres.jpg" alt="MR. Sunil" class="bio-modal-img">
+            <h2>MR. Sunil</h2>
+            <div class="bio-subtitle">Chairman</div>
+            <div class="bio-text">
+                <p>It is a social obligation to make society happy, content, flourish and should be achieved through higher education, the knowledge hub to be made available and use by students...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= LOGIN REQUIRED MODAL ================= -->
+    <div class="login-modal" id="loginRequiredModal">
+        <div class="login-modal-box">
+            <button class="modal-close" type="button" onclick="closeLoginModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="login-modal-icon">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2>Login Required</h2>
+            <p>Please login to <strong>view or download</strong> question papers.</p>
+            <div class="modal-login-buttons">
+                <a href="index.php"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= TOP BAR ================= -->
+    <div class="top-bar">
+        <div>
+            <span><i class="fa-solid fa-phone"></i> 08579-268585</span>
+            <span><i class="fa-solid fa-envelope"></i> mtidegree@gmail.com</span>
+        </div>
+        <div>
+            <span><i class="fa-solid fa-graduation-cap"></i> Previous Year Question Papers Portal</span>
+        </div>
+    </div>
+
+    <!-- ================= HEADER ================= -->
+    <header>
+        <div class="logo-area">
+            <div class="header-profiles">
+                <div class="profile-item">
+                    <!-- LINKED TO svu1.png -->
+                    <img src="svu1.png" alt="SV University" class="svu-symbol">
+                </div>
+                <div class="profile-item" onclick="openCorrespondentBioModal()">
+                    <img src="chair.png" alt="MR. Ravindra Babu">
+                    <span>MR. Ravindra babu<br>(Correspondent)</span>
+                </div>
+                <div class="profile-item" onclick="openChairmanBioModal()">
+                    <img src="corres.jpg" alt="MR. Sunil">
+                    <span>MR. Sunil<br>(Chairman)</span>
+                </div>
+            </div>
+            
+            <!-- LOGO SHOWING mt.png INSIDE -->
+            <div class="logo">
+                <img src="mt.png" alt="Mother Theresa Logo" onerror="this.style.display='none'; this.parentNode.innerText='MT';">
+            </div>
+
+            <div class="college-name">
+                <h2>Mother Theresa Degree College</h2>
+                <p>Previous Year Question Papers Portal</p>
+            </div>
+        </div>
+
+        <div class="nav-right-container">
+            <nav>
+                <a href="#home">Home</a>
+                <a href="#courses">Courses</a>
+                <a href="#about">About & FAQ</a>
+                <a href="#contact">Contact</a>
+            </nav>
+            <div class="header-profiles-right">
+                <div class="profile-item" onclick="openPrincipalBioModal()">
+                    <img src="prin.jfif" alt="Principal">
+                    <span>Principal</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= MARQUEE ================= -->
+    <div class="announcement">
+        <marquee behavior="scroll" direction="left" scrollamount="6">
+            <i class="fa-solid fa-bullhorn"></i> Welcome to Mother Theresa Degree College
+            &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; Previous Year Question Papers Portal
+            &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; Prepare Better • Practice More • Score Better
+        </marquee>
+    </div>
+
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Previous Year <span>Question Papers</span></h1>
+            <p>Welcome to the Previous Year Question Papers Portal of Mother Theresa Degree College. Find, view and download previous examination question papers easily for your exam preparation.</p>
+            <div class="hero-buttons">
+                <a href="#papers" class="primary-btn"><i class="fa-solid fa-file-pdf"></i> Browse Question Papers</a>
+                <a href="index.php" class="secondary-btn"><i class="fa-solid fa-book"></i> Browse website</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= COURSES ================= -->
+    <section class="section" id="courses">
+        <div class="section-title">
+            <h2>Browse By Course</h2>
+            <p>Select your course to find previous year question papers.</p>
+        </div>
+        <div class="cards">
+            <div class="card">
+                <i class="fa-solid fa-calculator"></i>
+                <h3>B.Com</h3>
+                <p>Commerce, accounting and business related previous year question papers.</p>
+            </div>
+            <div class="card">
+                <i class="fa-solid fa-flask"></i>
+                <h3>B.Sc</h3>
+                <p>Science subjects and previous examination question papers.</p>
+            </div>
+            <div class="card">
+                <i class="fa-solid fa-laptop-code"></i>
+                <h3>BCA</h3>
+                <p>Computer applications, programming and technology question papers.</p>
+            </div>
+            <div class="card">
+                <i class="fa-solid fa-briefcase"></i>
+                <h3>BBA</h3>
+                <p>Business administration and management question papers.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= QUESTION PAPERS ================= -->
+    <section class="section papers" id="papers">
+        <div class="section-title">
+            <h2>Recent Question Papers</h2>
+            <p>Access recently uploaded examination papers.</p>
+        </div>
+        <div class="paper-grid">
+            <div class="paper">
+                <div class="paper-icon"><i class="fa-solid fa-file-code"></i></div>
+                <h3>Web Technology</h3>
+                <p>BCA - Semester 4 (2024)</p>
+                <div class="paper-buttons">
+                    <button class="paper-btn" onclick="openLoginModal()"><i class="fa-solid fa-eye"></i> View</button>
+                    <button class="paper-btn" onclick="openLoginModal()"><i class="fa-solid fa-download"></i> Download</button>
+                </div>
+            </div>
+            <div class="paper">
+                <div class="paper-icon"><i class="fa-solid fa-calculator"></i></div>
+                <h3>Financial Accounting</h3>
+                <p>B.Com - Semester 1 (2024)</p>
+                <div class="paper-buttons">
+                    <button class="paper-btn" onclick="openLoginModal()"><i class="fa-solid fa-eye"></i> View</button>
+                    <button class="paper-btn" onclick="openLoginModal()"><i class="fa-solid fa-download"></i> Download</button>
+                </div>
+            </div>
+            <div class="paper">
+                <div class="paper-icon"><i class="fa-solid fa-atom"></i></div>
+                <h3>Physics - I</h3>
+                <p>B.Sc - Semester 2 (2023)</p>
+                <div class="paper-buttons">
+                    <button class="paper-btn" onclick="openLoginModal()"><i class="fa-solid fa-eye"></i> View</button>
+                    <button class="paper-btn" onclick="openLoginModal()"><i class="fa-solid fa-download"></i> Download</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FEATURES ================= -->
+    <section class="section">
+        <div class="section-title">
+            <h2>Why Use Our Portal?</h2>
+            <p>Everything students need to prepare for examinations.</p>
+        </div>
+        <div class="features">
+            <div class="feature">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <h3>Easy Search</h3>
+                <p>Search question papers by course, semester, subject and year.</p>
+            </div>
+            <div class="feature">
+                <i class="fa-solid fa-file-pdf"></i>
+                <h3>PDF Papers</h3>
+                <p>Login before viewing previous examination papers in PDF format.</p>
+            </div>
+            <div class="feature">
+                <i class="fa-solid fa-download"></i>
+                <h3>Easy Download</h3>
+                <p>Login first and download question papers for examination preparation.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= ABOUT ================= -->
+    <section class="section papers" id="about">
+        <div class="about">
+            <div class="about-img">
+                <img src="degree.png" 
+                     alt="Campus" 
+                     onerror="this.onerror=null; this.src='https://images.pexels.com/photos/207691/pexels-photo-207691.jpeg?auto=compress&cs=tinysrgb&w=800';">
+            </div>
+            <div class="about-content">
+                <h2>Mother Theresa Degree College portal</h2>
+                <p>This Previous Year Question Papers Portal is designed to provide students with easy access to previous examination papers.</p>
+                <p>Students can view and download question papers after logging in, helping them prepare effectively for their exams.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer id="contact">
+        <div class="footer-grid">
+            <div>
+                <h3>Mother Theresa Degree College</h3>
+                <p>Mother Theresa Degree College is an educational institution providing undergraduate education to students.</p>
+            </div>
+            <div>
+                <h3>Quick Links</h3>
+                <a href="#home">Home</a>
+                <a href="#courses">Courses</a>
+                <a href="#papers">Question Papers</a>
+                <a href="form.html">Student Login</a>
+            </div>
+            <div>
+                <h3>Contact Info</h3>
+                <p><i class="fa-solid fa-phone"></i> 08579-268585</p>
+                <p><i class="fa-solid fa-envelope"></i> mtidegree@gmail.com</p>
+                <p><i class="fa-solid fa-location-dot"></i> Palamaner, Andhra Pradesh</p>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; Mother Theresa Degree College. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        function openLoginModal() { document.getElementById('loginRequiredModal').classList.add('show'); }
+        function closeLoginModal() { document.getElementById('loginRequiredModal').classList.remove('show'); }
+
+        function openPrincipalBioModal() { document.getElementById('principalBioModal').classList.add('show'); }
+        function closePrincipalBioModal() { document.getElementById('principalBioModal').classList.remove('show'); }
+
+        function openCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.add('show'); }
+        function closeCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.remove('show'); }
+
+        function openChairmanBioModal() { document.getElementById('chairmanBioModal').classList.add('show'); }
+        function closeChairmanBioModal() { document.getElementById('chairmanBioModal').classList.remove('show'); }
+
+        // Close modals on clicking outside
+        window.addEventListener('click', function (event) {
+            const modals = document.querySelectorAll('.login-modal, .bio-modal');
+            modals.forEach(function (modal) {
+                if (event.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

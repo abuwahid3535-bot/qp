@@ -1,0 +1,16 @@
+# OS / editor cruft
+Thumbs.db
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# PHP
+vendor/
+*.log
+
+# Composer
+composer.phar
+
+# Local environment overrides
+config/config.local.php
