@@ -82,3 +82,38 @@
 
     document.querySelectorAll('form[data-chained]').forEach(wire);
 })();
+
+/**
+ * Button ripple effect
+ * Adds a nice ripple animation when clicking buttons with .btn class
+ */
+(function () {
+    'use strict';
+
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.btn');
+        if (!btn) return;
+
+        // Remove existing ripples
+        var existingRipples = btn.querySelectorAll('.ripple');
+        existingRipples.forEach(function (ripple) { ripple.remove(); });
+
+        // Create ripple element
+        var ripple = document.createElement('span');
+        ripple.className = 'ripple';
+
+        // Calculate position
+        var rect = btn.getBoundingClientRect();
+        var size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+
+        btn.appendChild(ripple);
+
+        // Remove ripple after animation
+        setTimeout(function () {
+            ripple.remove();
+        }, 600);
+    });
+})();

@@ -156,6 +156,7 @@ INSERT INTO subjects (id, subcourse_id, code, name) VALUES
 (12, 4, 'CS201', 'Data Structures'),
 (13, 4, 'CS301', 'Database Management Systems'),
 (14, 4, 'CS401', 'Operating Systems'),
+(15, 4, 'CS402', 'Real Analysis'),
 (15, 5, 'BO101', 'Plant Physiology'),
 (16, 5, 'BO201', 'Genetics'),
 (17, 6, 'ST101', 'Probability Theory'),

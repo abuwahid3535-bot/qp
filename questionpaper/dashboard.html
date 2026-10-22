@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Mother Theresa Degree College</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Auth check -->
+    <script>
+        (function() {
+            const user = JSON.parse(sessionStorage.getItem('mt_user') || 'null');
+            const loggedIn = sessionStorage.getItem('mt_logged_in') === 'true';
+            
+            console.log('Dashboard Auth Check:', { user, loggedIn });
+            
+            if (!loggedIn || !user || user.role !== 'staff') {
+                console.log('Redirecting to login...');
+                sessionStorage.clear();
+                window.location.href = 'login.html?redirect=dashboard.html';
+            }
+        })();
+    </script>
+
+    <!-- ================= TOP BAR ================= -->
+    <div class="top-bar">
+        <div>
+            <span><i class="fa-solid fa-phone"></i> 08579-268585</span>
+            <span><i class="fa-solid fa-envelope"></i> mtidegree@gmail.com</span>
+        </div>
+        <div>
+            <span><i class="fa-solid fa-graduation-cap"></i> Previous Year Question Papers Portal</span>
+        </div>
+    </div>
+
+    <!-- ================= HEADER ================= -->
+    <header>
+        <div class="logo-area">
+            <div class="header-profiles">
+                <div class="profile-item">
+                    <img src="css/svu1.PNG" alt="SV University" class="svu-symbol">
+                </div>
+                <div class="profile-item" onclick="openCorrespondentBioModal()">
+                    <img src="css/chair.png" alt="MR. Ravindra Babu">
+                    <span>MR. Ravindra babu<br>(Correspondent)</span>
+                </div>
+                <div class="profile-item" onclick="openChairmanBioModal()">
+                    <img src="assets/img/correspondent.jpg" alt="MR. Sunil">
+                    <span>MR. Sunil<br>(Chairman)</span>
+                </div>
+            </div>
+            
+            <!-- COLLEGE LOGO -->
+            <div class="logo">
+                <img src="assets/img/college.jpg" alt="Mother Theresa Logo" onerror="this.style.display='none'; this.parentNode.innerText='MT';">
+            </div>
+
+            <div class="college-name">
+                <h2>Mother Theresa Degree College</h2>
+                <p>Previous Year Question Papers Portal</p>
+            </div>
+        </div>
+
+        <div class="header-principal">
+            <div class="profile-item" onclick="openPrincipalBioModal()">
+                <img src="assets/img/principal.png" alt="Principal">
+                <span>Principal<br>Sri S. Madhusudhana Rao</span>
+            </div>
+        </div>
+
+        <div class="nav-right-container">
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="#papers">Question Papers</a>
+            </nav>
+            <div class="header-profiles-right">
+                <div class="dropdown">
+                    <button class="btn btn-ghost dropdown-toggle d-flex align-items-center gap-2" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="assets/img/principal.png" alt="User" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                        <span class="d-none d-md-inline" id="headerUserName">Staff</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><h6 class="dropdown-header" id="headerUserEmail"></h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="profile.html"><i class="bi bi-person me-2"></i> Profile</a></li>
+                        <li><a class="dropdown-item text-danger" href="logout.html"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= MARQUEE ================= -->
+    <div class="announcement">
+        <marquee behavior="scroll" direction="left" scrollamount="6">
+            <i class="fa-solid fa-bullhorn"></i> Welcome to Mother Theresa Degree College
+            &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; Previous Year Question Papers Portal
+            &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; Prepare Better • Practice More • Score Better
+        </marquee>
+    </div>
+
+    <main class="dashboard-main">
+        <div class="container">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1><i class="bi bi-speedometer2 me-2"></i> Staff Dashboard</h1>
+                    <p>Overview of question papers and upload activity</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="staff/upload.html" class="btn btn-accent"><i class="bi bi-cloud-arrow-up me-2"></i> Upload Paper</a>
+                    <a href="staff/manage.html" class="btn btn-primary"><i class="bi bi-collection me-2"></i> Manage Papers</a>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stat-cards">
+                <div class="stat-card primary">
+                    <div class="stat-icon"><i class="bi bi-file-earmark-text"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalPapers">0</div>
+                        <div class="stat-label">Total Papers in System</div>
+                    </div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon"><i class="bi bi-person-lines-fill"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="myUploads">0</div>
+                        <div class="stat-label">My Uploads</div>
+                    </div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon"><i class="bi bi-download"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="myDownloads">0</div>
+                        <div class="stat-label">My Total Downloads</div>
+                        <span class="stat-trend up"><i class="bi bi-arrow-up"></i> +15% this month</span>
+                    </div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-icon"><i class="bi bi-graph-up"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="systemDownloads">0</div>
+                        <div class="stat-label">System Wide Downloads</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="section-card" style="margin-bottom: 24px;">
+                <div class="section-header">
+                    <h2><i class="bi bi-lightning"></i> Quick Actions</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3">
+                            <a href="staff/upload.html" class="action-card">
+                                <div class="action-icon primary"><i class="bi bi-cloud-arrow-up"></i></div>
+                                <div class="action-label">Upload Paper</div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="staff/manage.html" class="action-card">
+                                <div class="action-icon success"><i class="bi bi-collection"></i></div>
+                                <div class="action-label">My Papers</div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="staff/manage.html" class="action-card">
+                                <div class="action-icon warning"><i class="bi bi-funnel"></i></div>
+                                <div class="action-label">Filter Papers</div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="profile.html" class="action-card">
+                                <div class="action-icon info"><i class="bi bi-person-gear"></i></div>
+                                <div class="action-label">My Profile</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity & Charts Row -->
+            <div class="row g-4">
+                <!-- Recent Uploads -->
+                <div class="col-lg-7">
+                    <div class="section-card">
+                        <div class="section-header d-flex justify-content-between align-items-center">
+                            <h2><i class="bi bi-clock-history"></i> Recent Activity</h2>
+                            <a href="staff/manage.html" class="btn btn-ghost btn-sm">View All</a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="papers-table" id="activityTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50%;">Paper</th>
+                                        <th style="width: 18%;">Course / Subject</th>
+                                        <th style="width: 12%;">Uploaded</th>
+                                        <th style="width: 10%;">Downloads</th>
+                                        <th style="width: 10%;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activityBody">
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="empty-state" style="padding: 40px 20px;">
+                                                <i class="bi bi-upload"></i>
+                                                <h4>No recent uploads</h4>
+                                                <p>Upload your first question paper to get started.</p>
+                                                <a href="staff/upload.html" class="btn btn-accent mt-2"><i class="bi bi-cloud-arrow-up me-2"></i> Upload Now</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Papers & Stats -->
+                <div class="col-lg-5">
+                    <div class="section-card h-100">
+                        <div class="section-header">
+                            <h2><i class="bi bi-trophy"></i> Top Performing Papers</h2>
+                        </div>
+                        <div class="card-body p-0" id="topPapersList">
+                            <div class="empty-state" style="padding: 40px 20px;">
+                                <i class="bi bi-graph-up"></i>
+                                <h4>No data yet</h4>
+                                <p>Upload papers to see performance metrics.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card mt-4">
+                        <div class="section-header">
+                            <h2><i class="bi bi-bar-chart"></i> Quick Stats</h2>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="quick-stats">
+                                <div class="quick-stat">
+                                    <span class="quick-stat-value" id="activePapers">0</span>
+                                    <span class="quick-stat-label">Active Papers</span>
+                                </div>
+                                <div class="quick-stat">
+                                    <span class="quick-stat-value" id="inactivePapers">0</span>
+                                    <span class="quick-stat-label">Inactive Papers</span>
+                                </div>
+                                <div class="quick-stat">
+                                    <span class="quick-stat-value" id="thisMonthUploads">0</span>
+                                    <span class="quick-stat-label">This Month</span>
+                                </div>
+                                <div class="quick-stat">
+                                    <span class="quick-stat-value" id="avgDownloads">0</span>
+                                    <span class="quick-stat-label">Avg Downloads/Paper</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Overview -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="bi bi-database"></i> System Overview</h2>
+                </div>
+                <div class="filter-form">
+                    <form id="filterForm" class="filter-row">
+                        <div class="filter-group">
+                            <label for="course_id">Course</label>
+                            <select class="form-select" name="course_id" id="course_id">
+                                <option value="">All Courses</option>
+                                <option value="1">B.Com</option>
+                                <option value="2">B.Sc</option>
+                                <option value="3">BCA</option>
+                                <option value="4">BBA</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="subcourse_id">Sub-Course</label>
+                            <select class="form-select" name="subcourse_id" id="subcourse_id" disabled>
+                                <option value="">All Sub-Courses</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="semester">Semester</label>
+                            <select class="form-select" name="semester" id="semester">
+                                <option value="">All Semesters</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="subject_id">Subject</label>
+                            <select class="form-select" name="subject_id" id="subject_id" disabled>
+                                <option value="">All Subjects</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-search me-2"></i> Apply Filters</button>
+                            <button type="button" class="btn btn-outline" id="resetFilters"><i class="bi bi-arrow-counterclockwise me-2"></i> Reset</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="table-responsive">
+                    <table class="papers-table" id="systemTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%;">Question Paper</th>
+                                <th style="width: 15%;">Course / Subject</th>
+                                <th style="width: 12%;">Year / Sem</th>
+                                <th style="width: 10%;">Downloads</th>
+                                <th style="width: 10%;">Uploaded By</th>
+                                <th style="width: 13%;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="systemBody">
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <i class="bi bi-funnel"></i>
+                                        <h4>Apply filters to view papers</h4>
+                                        <p>Select a course to see all question papers in the system.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <div class="footer-grid">
+            <div>
+                <h3>Mother Theresa Degree College</h3>
+                <p>Mother Theresa Degree College is an educational institution providing undergraduate education to students.</p>
+            </div>
+            <div>
+                <h3>Quick Links</h3>
+                <a href="index.html">Home</a>
+                <a href="#courses">Courses</a>
+                <a href="#papers">Question Papers</a>
+                <a href="login.html">Login</a>
+            </div>
+            <div>
+                <h3>Contact Info</h3>
+                <p><i class="fa-solid fa-phone"></i> 08579-268585</p>
+                <p><i class="fa-solid fa-envelope"></i> mtidegree@gmail.com</p>
+                <p><i class="fa-solid fa-location-dot"></i> Palamaner, Andhra Pradesh</p>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; Mother Theresa Degree College. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- ================= MODALS ================= -->
+    <!-- ================= PRINCIPAL BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="principalBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closePrincipalBioModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Principal</h2>
+            <div class="bio-subtitle">Principal</div>
+            <div class="bio-text">
+                <p>Sri S. Madhusudhana Rao is the Principal of Mother Theresa Degree College (MTDC), Palamaner. He is an experienced educationist with around 25 years of experience in the field of education.
+
+He holds an M.Sc. in Mathematics and an M.Phil. from M.K. University, along with a B.Ed. His academic background and extensive experience reflect his commitment to education and continuous learning.
+
+As Principal, he provides academic and administrative leadership to the institution and works towards creating a supportive environment for students and faculty.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CORRESPONDENT BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="correspondentBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closeCorrespondentBioModal()"><i class="fa-solid fa-xmark"></i></button>
+            <img src="assets/img/chair.png" alt="MR. Ravindra Babu" class="bio-modal-img">
+            <h2>MR. Ravindra Babu</h2>
+            <div class="bio-subtitle">Correspondent</div>
+            <div class="bio-text">
+                <p>The pursuit of money as an end in itself is making people greedy and excessively commercial minded. Our aim is to provide professionals who should be pure in thought, word and deed, with integrity and character...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CHAIRMAN BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="chairmanBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closeChairmanBioModal()"><i class="fa-solid fa-xmark"></i></button>
+            <img src="assets/img/corres.jpg" alt="MR. Sunil" class="bio-modal-img">
+            <h2>MR. Sunil</h2>
+            <div class="bio-subtitle">Chairman</div>
+            <div class="bio-text">
+                <p>It is a social obligation to make society happy, content, flourish and should be achieved through higher education, the knowledge hub to be made available and use by students...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= LOGIN REQUIRED MODAL ================= -->
+    <div class="login-modal" id="loginRequiredModal">
+        <div class="login-modal-box">
+            <button class="modal-close" type="button" onclick="closeLoginModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="login-modal-icon"><i class="fa-solid fa-lock"></i></div>
+            <h2>Login Required</h2>
+            <p>Please login to <strong>view or download</strong> question papers.</p>
+            <div class="modal-login-buttons"><a href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Login</a></div>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        function openLoginModal() { document.getElementById('loginRequiredModal').classList.add('show'); }
+        function closeLoginModal() { document.getElementById('loginRequiredModal').classList.remove('show'); }
+
+        function openPrincipalBioModal() { document.getElementById('principalBioModal').classList.add('show'); }
+        function closePrincipalBioModal() { document.getElementById('principalBioModal').classList.remove('show'); }
+
+        function openCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.add('show'); }
+        function closeCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.remove('show'); }
+
+        function openChairmanBioModal() { document.getElementById('chairmanBioModal').classList.add('show'); }
+        function closeChairmanBioModal() { document.getElementById('chairmanBioModal').classList.remove('show'); }
+
+        // Close modals on clicking outside
+        window.addEventListener('click', function (event) {
+            const modals = document.querySelectorAll('.login-modal, .bio-modal');
+            modals.forEach(function (modal) {
+                if (event.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+        });
+
+        // Load user info in header
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(sessionStorage.getItem('mt_user') || 'null');
+            if (user) {
+                document.getElementById('headerUserName').textContent = user.name || user.email;
+                document.getElementById('headerUserEmail').textContent = user.email;
+            }
+        });
+
+        // Dashboard Logic
+        (function() {
+            // Sample system data
+            let allSystemPapers = [
+                { id: 1, title: "Programming in C - Semester End Exam", course: "B.C.A", subcourse: "General", subject: "Programming in C", course_id: 2, subcourse_id: 7, subject_id: 19, year: "2024-2025", year_id: 5, semester: 1, downloads: 156, uploaded_by: "Dr. Sharma", uploaded_at: "2024-12-15", status: "active" },
+                { id: 2, title: "Data Structures - Mid Term Exam", course: "B.C.A", subcourse: "General", subject: "Data Structures", course_id: 2, subcourse_id: 7, subject_id: 21, year: "2024-2025", year_id: 5, semester: 2, downloads: 89, uploaded_by: "Prof. Reddy", uploaded_at: "2024-11-20", status: "active" },
+                { id: 3, title: "Financial Accounting - Annual Exam", course: "B.Com", subcourse: "General", subject: "Financial Accounting", course_id: 3, subcourse_id: 8, subject_id: 27, year: "2023-2024", year_id: 4, semester: 1, downloads: 234, uploaded_by: "Dr. Kumar", uploaded_at: "2023-10-10", status: "active" },
+                { id: 4, title: "Physics - Mechanics", course: "B.Sc", subcourse: "Physics", subject: "Mechanics", course_id: 1, subcourse_id: 1, subject_id: 1, year: "2024-2025", year_id: 5, semester: 1, downloads: 178, uploaded_by: "Dr. Patel", uploaded_at: "2024-09-05", status: "active" },
+                { id: 5, title: "Database Management Systems", course: "B.C.A", subcourse: "General", subject: "DBMS", course_id: 2, subcourse_id: 7, subject_id: 22, year: "2023-2024", year_id: 4, semester: 3, downloads: 312, uploaded_by: "Prof. Singh", uploaded_at: "2023-11-28", status: "active" },
+                { id: 6, title: "Business Mathematics", course: "B.Com", subcourse: "Computers", subject: "Business Mathematics", course_id: 3, subcourse_id: 9, subject_id: 32, year: "2024-2025", year_id: 5, semester: 1, downloads: 95, uploaded_by: "Dr. Gupta", uploaded_at: "2024-08-15", status: "active" },
+                { id: 7, title: "Marketing Management", course: "B.B.A", subcourse: "Marketing", subject: "Marketing Management", course_id: 4, subcourse_id: 12, subject_id: 39, year: "2023-2024", year_id: 4, semester: 2, downloads: 67, uploaded_by: "Prof. Verma", uploaded_at: "2023-09-12", status: "inactive" },
+                { id: 8, title: "Organisational Behaviour", course: "B.B.A", subcourse: "General", subject: "Organisational Behaviour", course_id: 4, subcourse_id: 11, subject_id: 37, year: "2024-2025", year_id: 5, semester: 1, downloads: 123, uploaded_by: "Dr. Jain", uploaded_at: "2024-07-20", status: "active" },
+            ];
+
+            // My papers (filter by current user)
+            const currentUser = JSON.parse(sessionStorage.getItem('mt_user') || 'null');
+            const myPapers = allSystemPapers.filter(p => p.uploaded_by === (currentUser?.name || 'Dr. Sharma'));
+
+            // Initialize
+            updateDashboardStats();
+            renderRecentActivity();
+            renderTopPapers();
+            renderSystemTable();
+
+            // Load saved filters
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('course_id')) {
+                document.getElementById('course_id').value = urlParams.get('course_id');
+                loadSubcourses(document.getElementById('filterForm'));
+            }
+            if (urlParams.get('subcourse_id')) {
+                setTimeout(() => {
+                    document.getElementById('subcourse_id').value = urlParams.get('subcourse_id');
+                    loadSubjects(document.getElementById('filterForm'));
+                }, 300);
+            }
+            if (urlParams.get('subject_id')) {
+                setTimeout(() => {
+                    document.getElementById('subject_id').value = urlParams.get('subject_id');
+                    applySystemFilters();
+                }, 600);
+            }
+            if (urlParams.get('semester')) document.getElementById('semester').value = urlParams.get('semester');
+
+            // Filter form
+            document.getElementById('filterForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                applySystemFilters();
+            });
+
+            document.getElementById('resetFilters').addEventListener('click', function() {
+                document.getElementById('filterForm').reset();
+                document.getElementById('subcourse_id').disabled = true;
+                document.getElementById('subject_id').disabled = true;
+                renderSystemTable();
+            });
+
+            const sysFilterForm = document.getElementById('filterForm');
+
+            document.getElementById('course_id').addEventListener('change', function() {
+                loadSubcourses(sysFilterForm);
+            });
+
+            document.getElementById('subcourse_id').addEventListener('change', function() {
+                loadSubjects(sysFilterForm);
+            });
+
+            document.getElementById('semester').addEventListener('change', function() {
+                loadSubjects(sysFilterForm);
+            });
+
+            function loadSubcourses(form) {
+                const courseId = form.elements['course_id'].value;
+                const subcourseSelect = form.elements['subcourse_id'];
+                const subjectSelect = form.elements['subject_id'];
+                
+                if (!courseId) {
+                    subcourseSelect.innerHTML = '<option value="">All Sub-Courses</option>';
+                    subcourseSelect.disabled = true;
+                    subjectSelect.innerHTML = '<option value="">All Subjects</option>';
+                    subjectSelect.disabled = true;
+                    return;
+                }
+                
+                subcourseSelect.innerHTML = '<option value="">Loading...</option>';
+                subcourseSelect.disabled = false;
+                
+                setTimeout(() => {
+                    const subcourses = getSubcourses(courseId);
+                    subcourseSelect.innerHTML = '<option value="">All Sub-Courses</option>';
+                    subcourses.forEach(sc => {
+                        const opt = document.createElement('option');
+                        opt.value = sc.id;
+                        opt.textContent = sc.name;
+                        subcourseSelect.appendChild(opt);
+                    });
+                }, 300);
+            }
+
+            function loadSubjects(form) {
+                const subcourseId = form.elements['subcourse_id'].value;
+                const subjectSelect = form.elements['subject_id'];
+                const semester = form.elements['semester'] ? form.elements['semester'].value : '';
+                
+                if (!subcourseId) {
+                    subjectSelect.innerHTML = '<option value="">All Subjects</option>';
+                    subjectSelect.disabled = true;
+                    return;
+                }
+                
+                subjectSelect.innerHTML = '<option value="">Loading...</option>';
+                subjectSelect.disabled = false;
+                
+                setTimeout(() => {
+                    const subjects = getSubjects(subcourseId, semester);
+                    subjectSelect.innerHTML = '<option value="">All Subjects</option>';
+                    subjects.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.id;
+                        opt.textContent = s.name + (s.semester ? ` (Sem ${s.semester})` : '');
+                        subjectSelect.appendChild(opt);
+                    });
+                }, 300);
+            }
+
+            function applySystemFilters() {
+                const courseId = document.getElementById('course_id').value;
+                const subcourseId = document.getElementById('subcourse_id').value;
+                const subjectId = document.getElementById('subject_id').value;
+                const semester = document.getElementById('semester').value;
+
+                const params = new URLSearchParams();
+                if (courseId) params.set('course_id', courseId);
+                if (subcourseId) params.set('subcourse_id', subcourseId);
+                if (subjectId) params.set('subject_id', subjectId);
+                if (semester) params.set('semester', semester);
+                window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+
+                renderSystemTable();
+            }
+
+            function renderSystemTable() {
+                const courseId = document.getElementById('course_id').value;
+                const subcourseId = document.getElementById('subcourse_id').value;
+                const subjectId = document.getElementById('subject_id').value;
+                const semester = document.getElementById('semester').value;
+
+                const filtered = allSystemPapers.filter(paper => {
+                    if (courseId && paper.course_id != courseId) return false;
+                    if (subcourseId && paper.subcourse_id != subcourseId) return false;
+                    if (subjectId && paper.subject_id != subjectId) return false;
+                    if (semester && paper.semester != semester) return false;
+                    return true;
+                });
+
+                const tbody = document.getElementById('systemBody');
+                
+                if (filtered.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <i class="bi bi-filter"></i>
+                                    <h4>No papers match filters</h4>
+                                    <p>Try adjusting your filters.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = filtered.map(paper => `
+                    <tr>
+                        <td>
+                            <div class="paper-title">${paper.title}</div>
+                            <div class="paper-meta">
+                                <span><i class="bi bi-tag"></i> ${paper.subject}</span>
+                                <span><i class="bi bi-calendar"></i> ${paper.uploaded_at}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-primary">${paper.course}</span>
+                            ${paper.subcourse !== 'General' ? `<span class="badge badge-info" style="margin-top: 4px; display: inline-block;">${paper.subcourse}</span>` : ''}
+                        </td>
+                        <td>
+                            <span>${paper.year}</span><br>
+                            <small>Semester ${paper.semester}</small>
+                        </td>
+                        <td><span class="fw-bold">${paper.downloads}</span></td>
+                        <td><small>${paper.uploaded_by}</small></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" onclick="viewSystemPaper(${paper.id})" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn-icon" onclick="downloadSystemPaper(${paper.id})" title="Download">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            function renderRecentActivity() {
+                const tbody = document.getElementById('activityBody');
+                const recent = myPapers.slice(0, 5);
+                
+                if (recent.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state" style="padding: 40px 20px;">
+                                    <i class="bi bi-upload"></i>
+                                    <h4>No recent uploads</h4>
+                                    <p>Upload your first question paper to get started.</p>
+                                    <a href="staff/upload.html" class="btn btn-accent mt-2"><i class="bi bi-cloud-arrow-up me-2"></i> Upload Now</a>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = recent.map(paper => `
+                    <tr>
+                        <td>
+                            <div class="paper-title">${paper.title}</div>
+                            <div class="paper-meta">
+                                <span><i class="bi bi-tag"></i> ${paper.subject}</span>
+                                <span><i class="bi bi-calendar"></i> ${paper.uploaded_at}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-primary">${paper.course}</span>
+                            ${paper.subcourse !== 'General' ? `<span class="badge badge-info" style="margin-top: 4px; display: inline-block;">${paper.subcourse}</span>` : ''}
+                        </td>
+                        <td>${paper.uploaded_at}</td>
+                        <td><span class="fw-bold">${paper.downloads}</span></td>
+                        <td>
+                            <span class="badge ${paper.status === 'active' ? 'badge-success' : 'badge-secondary'}">
+                                ${paper.status === 'active' ? '<i class="bi bi-check-circle me-1"></i> Active' : '<i class="bi bi-pause-circle me-1"></i> Inactive'}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            function renderTopPapers() {
+                const container = document.getElementById('topPapersList');
+                const sorted = [...myPapers].sort((a, b) => b.downloads - a.downloads).slice(0, 5);
+                
+                if (sorted.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="padding: 40px 20px;">
+                            <i class="bi bi-graph-up"></i>
+                            <h4>No data yet</h4>
+                            <p>Upload papers to see performance metrics.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = sorted.map((paper, index) => `
+                    <div class="d-flex align-items-center p-3 border-bottom hover-bg" style="transition: background 0.2s;">
+                        <span class="fw-bold text-primary me-3" style="font-size: 18px; min-width: 30px;">${index + 1}</span>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="fw-medium text-truncate" style="max-width: 250px;">${paper.title}</div>
+                            <div class="text-muted small">${paper.subject} • ${paper.year} Sem ${paper.semester}</div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge badge-primary">${paper.downloads} downloads</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function updateDashboardStats() {
+                const totalSystem = allSystemPapers.length;
+                const myUploads = myPapers.length;
+                const myDownloads = myPapers.reduce((sum, p) => sum + p.downloads, 0);
+                const systemDownloads = allSystemPapers.reduce((sum, p) => sum + p.downloads, 0);
+                const activeMy = myPapers.filter(p => p.status === 'active').length;
+                const inactiveMy = myPapers.filter(p => p.status === 'inactive').length;
+                const thisMonth = myPapers.filter(p => {
+                    const uploadDate = new Date(p.uploaded_at);
+                    const now = new Date();
+                    return uploadDate.getMonth() === now.getMonth() && uploadDate.getFullYear() === now.getFullYear();
+                }).length;
+                const avgDownloads = myUploads > 0 ? Math.round(myDownloads / myUploads) : 0;
+
+                document.getElementById('totalPapers').textContent = totalSystem;
+                document.getElementById('myUploads').textContent = myUploads;
+                document.getElementById('myDownloads').textContent = myDownloads.toLocaleString();
+                document.getElementById('systemDownloads').textContent = systemDownloads.toLocaleString();
+                document.getElementById('activePapers').textContent = activeMy;
+                document.getElementById('inactivePapers').textContent = inactiveMy;
+                document.getElementById('thisMonthUploads').textContent = thisMonth;
+                document.getElementById('avgDownloads').textContent = avgDownloads;
+            }
+
+            // Global functions
+            window.viewSystemPaper = function(id) {
+                const paper = allSystemPapers.find(p => p.id === id);
+                if (paper) window.open(paper.file_path || '#', '_blank');
+            };
+
+            window.downloadSystemPaper = function(id) {
+                const paper = allSystemPapers.find(p => p.id === id);
+                if (!paper) return;
+                paper.downloads++;
+                if (myPapers.includes(paper)) {
+                    const myPaper = myPapers.find(p => p.id === id);
+                    if (myPaper) myPaper.downloads++;
+                    updateDashboardStats();
+                    renderRecentActivity();
+                    renderTopPapers();
+                }
+                renderSystemTable();
+                showToast('Download started: ' + paper.title);
+            };
+
+            function showToast(message) {
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                toast.innerHTML = `<i class="bi bi-check-circle me-2"></i>${message}`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // Mock data functions
+            function getSubcourses(courseId) {
+                const data = {
+                    '1': [{ id: 1, name: 'General' }],
+                    '2': [{ id: 2, name: 'Computer Science' }, { id: 3, name: 'Data Science' }],
+                    '3': [{ id: 4, name: 'General' }],
+                    '4': [{ id: 6, name: 'General' }]
+                };
+                return data[courseId] || [];
+            }
+
+            function getSubjects(subcourseId, semesterFilter = '') {
+                // Subject data with codes to determine semester
+                // Code pattern: XX1xx = Sem 1, XX2xx = Sem 2, XX3xx = Sem 3, XX4xx = Sem 4
+                const subjectData = {
+                    '1': [ // B.Com General
+                        { id: 1, code: 'CO101', name: 'Financial Accounting' },
+                        { id: 2, code: 'CO102', name: 'Business Laws' },
+                        { id: 3, code: 'CO201', name: 'Corporate Accounting' },
+                        { id: 4, code: 'CO301', name: 'Cost Accounting' },
+                        { id: 5, code: 'CO302', name: 'Taxation' }
+                    ],
+                    '2': [ // Computer Science (B.Sc)
+                        { id: 11, code: 'CS101', name: 'Programming in C' },
+                        { id: 12, code: 'CS201', name: 'Data Structures' },
+                        { id: 13, code: 'CS301', name: 'Database Management Systems' },
+                        { id: 14, code: 'CS401', name: 'Operating Systems' },
+                        { id: 15, code: 'CS402', name: 'Real Analysis' }
+                    ],
+                    '3': [ // Data Science (B.Sc) - new
+                        { id: 16, code: 'DS101', name: 'Introduction to Data Science' },
+                        { id: 17, code: 'DS201', name: 'Machine Learning Fundamentals' },
+                        { id: 18, code: 'DS301', name: 'Deep Learning' },
+                        { id: 19, code: 'DS401', name: 'Big Data Analytics' }
+                    ],
+                    '4': [ // BCA General
+                        { id: 10, code: 'CA101', name: 'Programming in C' },
+                        { id: 11, code: 'CA102', name: 'Digital Computer Fundamentals' },
+                        { id: 12, code: 'CA201', name: 'Data Structures' },
+                        { id: 13, code: 'CA202', name: 'Database Management Systems' },
+                        { id: 13, code: 'CA301', name: 'Operating Systems' },
+                        { id: 14, code: 'CA302', name: 'Computer Networks' },
+                        { id: 14, code: 'CA401', name: 'Web Technologies' },
+                        { id: 14, code: 'CA402', name: 'Software Engineering' }
+                    ],
+                    '6': [ // BBA General
+                        { id: 19, code: 'BB101', name: 'Principles of Management' },
+                        { id: 20, code: 'BB201', name: 'Organisational Behaviour' },
+                        { id: 21, code: 'BB301', name: 'Business Environment' }
+                    ]
+                };
+                
+                const subjects = subjectData[subcourseId] || [];
+                
+                // Add semester property based on code (1xx=1, 2xx=2, 3xx=3, 4xx=4)
+                return subjects.map(s => ({
+                    ...s,
+                    semester: parseInt(s.code.charAt(2)) || null
+                })).filter(s => !semesterFilter || s.semester == semesterFilter);
+            }
+        })();
+    </script>
+
+    <style>
+        /* Action cards */
+        .action-card {
+            display: block;
+            text-decoration: none;
+            color: var(--app-text);
+            background: var(--app-card);
+            border: 1px solid var(--app-border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            border-color: transparent;
+            color: var(--app-text);
+        }
+        
+        .action-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            margin: 0 auto 12px;
+        }
+        
+        .action-icon.primary { background: linear-gradient(135deg, var(--app-primary) 0%, var(--app-primary-dark) 100%); }
+        .action-icon.success { background: linear-gradient(135deg, var(--app-student) 0%, #0ea5e9 100%); }
+        .action-icon.warning { background: linear-gradient(135deg, var(--app-accent) 0%, var(--app-accent-hover) 100%); }
+        .action-icon.info { background: linear-gradient(135deg, var(--app-primary-light) 0%, #0ea5e9 100%); }
+        
+        .action-label {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        /* Quick stats */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        
+        .quick-stat {
+            background: var(--app-bg);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--app-border);
+            transition: all 0.3s ease;
+        }
+        
+        .quick-stat:hover {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .quick-stat-value {
+            display: block;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--app-primary);
+            margin-bottom: 4px;
+        }
+        
+        .quick-stat-label {
+            font-size: 12px;
+            color: var(--app-text-light);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Hover background utility */
+        .hover-bg:hover {
+            background: rgba(6, 43, 99, 0.02);
+        }
+
+        /* Min width utility */
+        .min-w-0 { min-width: 0; }
+    </style>
+</body>
+</html>

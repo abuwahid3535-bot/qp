@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Mother Theresa Degree College</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <!-- ================= TOP BAR ================= -->
+    <div class="top-bar">
+        <div>
+            <span><i class="fa-solid fa-phone"></i> 08579-268585</span>
+            <span><i class="fa-solid fa-envelope"></i> mtidegree@gmail.com</span>
+        </div>
+        <div>
+            <span><i class="fa-solid fa-graduation-cap"></i> Previous Year Question Papers Portal</span>
+        </div>
+    </div>
+
+    <!-- ================= HEADER ================= -->
+    <header>
+        <div class="logo-area">
+            <div class="header-profiles">
+                <div class="profile-item">
+                    <img src="css/svu1.PNG" alt="SV University" class="svu-symbol">
+                </div>
+                <div class="profile-item" onclick="openCorrespondentBioModal()">
+                    <img src="css/chair.png" alt="MR. Ravindra Babu">
+                    <span>MR. Ravindra babu<br>(Correspondent)</span>
+                </div>
+                <div class="profile-item" onclick="openChairmanBioModal()">
+                    <img src="assets/img/correspondent.jpg" alt="MR. Sunil">
+                    <span>MR. Sunil<br>(Chairman)</span>
+                </div>
+            </div>
+            
+            <!-- COLLEGE LOGO -->
+            <div class="logo">
+                <img src="assets/img/college.jpg" alt="Mother Theresa Logo" onerror="this.style.display='none'; this.parentNode.innerText='MT';">
+            </div>
+
+            <div class="college-name">
+                <h2>Mother Theresa Degree College</h2>
+                <p>Previous Year Question Papers Portal</p>
+            </div>
+        </div>
+
+        <div class="header-principal">
+            <div class="profile-item" onclick="openPrincipalBioModal()">
+                <img src="assets/img/principal.png" alt="Principal">
+                <span>Principal<br>Sri S. Madhusudhana Rao</span>
+            </div>
+        </div>
+
+        <div class="nav-right-container">
+            <nav>
+                <a href="index.html">Home</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="auth-form">
+        <div class="card">
+            <div class="card-header bg-white py-3">
+                <h2 class="h5 fw-bold mb-0 text-center"><i class="bi bi-person-plus"></i> Create an Account</h2>
+            </div>
+            <div class="card-body p-4">
+                <form id="registerForm" novalidate>
+                    <input type="hidden" name="csrf_token" value="token">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Choose your role</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="role" id="roleStudent" value="student" autocomplete="off" checked>
+                            <label class="btn btn-outline btn-lg" for="roleStudent">
+                                <i class="bi bi-mortarboard"></i> Student
+                            </label>
+                            <input type="radio" class="btn-check" name="role" id="roleStaff" value="staff" autocomplete="off">
+                            <label class="btn btn-outline btn-lg" for="roleStaff">
+                                <i class="bi bi-person-badge"></i> Staff
+                            </label>
+                        </div>
+                        <div class="form-text">Students download papers; staff members upload and manage them.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" for="name">Full name</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Ananya Sharma" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" for="email">Email address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required>
+                        </div>
+                        <div class="form-text">An OTP will be sent to this email for verification.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" for="mobile">Mobile number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                            <input type="tel" class="form-control" id="mobile" name="mobile" maxlength="10" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
+                        </div>
+                        <div class="form-text">An OTP will be sent to this number via SMS for verification.</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold" for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" minlength="8" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold" for="confirm_password">Confirm password</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="8" required>
+                        </div>
+                        <div class="form-text mt-n2">Minimum 8 characters.</div>
+                    </div>
+
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-accent btn-block btn-lg"><i class="bi bi-check-circle"></i> Register & Verify</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <p class="text-center mt-3 text-muted">Already have an account? <a href="login.html">Login here</a></p>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <div class="footer-grid">
+            <div>
+                <h3>Mother Theresa Degree College</h3>
+                <p>Mother Theresa Degree College is an educational institution providing undergraduate education to students.</p>
+            </div>
+            <div>
+                <h3>Quick Links</h3>
+                <a href="index.html">Home</a>
+                <a href="#courses">Courses</a>
+                <a href="#papers">Question Papers</a>
+            </div>
+            <div>
+                <h3>Contact Info</h3>
+                <p><i class="fa-solid fa-phone"></i> 08579-268585</p>
+                <p><i class="fa-solid fa-envelope"></i> mtidegree@gmail.com</p>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; Mother Theresa Degree College. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        // Check if sessionStorage is available (required for registration flow)
+        try {
+            sessionStorage.setItem('test', 'test');
+            sessionStorage.removeItem('test');
+        } catch (e) {
+            document.body.innerHTML = '<div class="container text-center py-5"><div class="alert alert-danger"><h4>Server Required</h4><p>This application requires a web server to function properly.</p><p>Please run it through XAMPP, WAMP, or PHP built-in server (<code>php -S localhost:8000</code>), not by opening files directly.</p></div></div>';
+            throw new Error('sessionStorage not available');
+        }
+
+        function openLoginModal() { document.getElementById('loginRequiredModal').classList.add('show'); }
+        function closeLoginModal() { document.getElementById('loginRequiredModal').classList.remove('show'); }
+
+        function openPrincipalBioModal() { document.getElementById('principalBioModal').classList.add('show'); }
+        function closePrincipalBioModal() { document.getElementById('principalBioModal').classList.remove('show'); }
+
+        function openCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.add('show'); }
+        function closeCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.remove('show'); }
+
+        function openChairmanBioModal() { document.getElementById('chairmanBioModal').classList.add('show'); }
+        function closeChairmanBioModal() { document.getElementById('chairmanBioModal').classList.remove('show'); }
+
+        // Close modals on clicking outside
+        window.addEventListener('click', function (event) {
+            const modals = document.querySelectorAll('.login-modal, .bio-modal');
+            modals.forEach(function (modal) {
+                if (event.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+        });
+
+        // Registration form handler
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Registering...';
+            btn.disabled = true;
+
+            const formData = new FormData(this);
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirm_password');
+            
+            if (password !== confirmPassword) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('Passwords do not match!');
+                return;
+            }
+
+            if (password.length < 8) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('Password must be at least 8 characters!');
+                return;
+            }
+
+            // Simulate registration & OTP sending
+            setTimeout(() => {
+                const userData = {
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    mobile: formData.get('mobile'),
+                    password: password, // In real app, this would be hashed
+                    role: formData.get('role'),
+                    email_verified: false,
+                    mobile_verified: false,
+                    created_at: new Date().toISOString()
+                };
+
+                // Generate demo OTPs (in real app, these would be sent via email/SMS)
+                const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
+                const mobileOTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+                // Store pending registration with OTPs
+                sessionStorage.setItem('mt_pending_user', JSON.stringify(userData));
+                sessionStorage.setItem('mt_email_otp', emailOTP);
+                sessionStorage.setItem('mt_mobile_otp', mobileOTP);
+                sessionStorage.setItem('mt_otp_expires', Date.now() + 10 * 60 * 1000); // 10 minutes
+
+                // In DEV mode, show OTPs in console/alert
+                console.log('DEV MODE - Email OTP:', emailOTP);
+                console.log('DEV MODE - Mobile OTP:', mobileOTP);
+                
+                // Redirect to verification page
+                window.location.href = 'verify.html';
+            }, 1000);
+        });
+
+        // Password match validation
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirm = this.value;
+            if (confirm && password !== confirm) {
+                this.setCustomValidity('Passwords do not match');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    </script>
+
+    <!-- ================= PRINCIPAL BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="principalBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closePrincipalBioModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img src="assets/img/prin.jfif" alt="Principal" class="bio-modal-img">
+            <h2>Principal</h2>
+            <div class="bio-subtitle">Principal</div>
+            <div class="bio-text">
+                <p>Sri S. Madhusudhana Rao is the Principal of Mother Theresa Degree College (MTDC), Palamaner. He is an experienced educationist with around 25 years of experience in the field of education.
+
+He holds an M.Sc. in Mathematics and an M.Phil. from M.K. University, along with a B.Ed. His academic background and extensive experience reflect his commitment to education and continuous learning.
+
+As Principal, he provides academic and administrative leadership to the institution and works towards creating a supportive environment for students and faculty.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CORRESPONDENT BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="correspondentBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closeCorrespondentBioModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img src="assets/img/chair.png" alt="MR. Ravindra Babu" class="bio-modal-img">
+            <h2>MR. Ravindra Babu</h2>
+            <div class="bio-subtitle">Correspondent</div>
+            <div class="bio-text">
+                <p>The pursuit of money as an end in itself is making people greedy and excessively commercial minded. Our aim is to provide professionals who should be pure in thought, word and deed, with integrity and character...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CHAIRMAN BIOGRAPHY MODAL ================= -->
+    <div class="bio-modal" id="chairmanBioModal">
+        <div class="bio-modal-box">
+            <button class="modal-close" type="button" onclick="closeChairmanBioModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img src="assets/img/corres.jpg" alt="MR. Sunil" class="bio-modal-img">
+            <h2>MR. Sunil</h2>
+            <div class="bio-subtitle">Chairman</div>
+            <div class="bio-text">
+                <p>It is a social obligation to make society happy, content, flourish and should be achieved through higher education, the knowledge hub to be made available and use by students...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= LOGIN REQUIRED MODAL ================= -->
+    <div class="login-modal" id="loginRequiredModal">
+        <div class="login-modal-box">
+            <button class="modal-close" type="button" onclick="closeLoginModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="login-modal-icon">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2>Login Required</h2>
+            <p>Please login to <strong>view or download</strong> question papers.</p>
+            <div class="modal-login-buttons">
+                <a href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
