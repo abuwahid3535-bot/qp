@@ -8,26 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-    <!-- Auth check - Firebase -->
-    <script type="module">
-        import { auth } from '../firebase-config.js';
-        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { db } from '../firebase-config.js';
-        import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) return window.location.href = '../login.html';
-            
-            const snap = await getDoc(doc(db, 'users', user.uid));
-            if (!snap.exists() || snap.data().role !== 'student') {
-                return window.location.href = '../login.html';
-            }
-        });
-    </script>
-
     <!-- ================= TOP BAR ================= -->
     <div class="top-bar">
         <div>
@@ -55,7 +39,7 @@
                     <span>MR. Sunil<br>(Chairman)</span>
                 </div>
             </div>
-            
+
             <!-- COLLEGE LOGO -->
             <div class="logo">
                 <img src="/assets/img/college.png" alt="Mother Theresa Logo" onerror="this.style.display='none'; this.parentNode.innerText='MT';">
@@ -101,12 +85,16 @@
             <!-- Dashboard Header -->
             <div class="dashboard-header">
                 <div class="dashboard-title">
-                    <h1><i class="bi bi-search me-2"></i> Browse & Download Papers</h1>
-                    <p>Choose your course and subject to find previous year question papers</p>
+                    <h1><i class="bi bi-search me-2"></i> Browse &amp; Download Papers</h1>
+                    <p>Search previous year question papers by course, subject and semester</p>
                 </div>
-                <div class="d-flex gap-2">
-                    <span class="badge badge-success d-flex align-items-center gap-1" style="padding: 6px 12px;"><i class="bi bi-check-circle"></i> Email Verified</span>
-                    <span class="badge badge-success d-flex align-items-center gap-1" style="padding: 6px 12px;"><i class="bi bi-check-circle"></i> Mobile Verified</span>
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="badge badge-primary" id="emailStatusBadge" style="padding: 6px 12px;">
+                        <i class="bi bi-envelope"></i> Checking email...
+                    </span>
+                    <span class="badge badge-primary" style="padding: 6px 12px;">
+                        <i class="bi bi-mortarboard"></i> Student
+                    </span>
                 </div>
             </div>
 
@@ -144,24 +132,20 @@
                     <form id="filterForm" class="filter-row">
                         <div class="filter-group">
                             <label for="course_id">Course</label>
-                            <select class="form-select" name="course_id" id="course_id" required>
-                                <option value="">-- Select Course --</option>
-                                <option value="1">B.Com</option>
-                                <option value="2">B.Sc</option>
-                                <option value="3">BCA</option>
-                                <option value="4">BBA</option>
+                            <select class="form-select" name="course_id" id="course_id">
+                                <option value="">All Courses</option>
                             </select>
                         </div>
                         <div class="filter-group">
                             <label for="subcourse_id">Sub-Course</label>
-                            <select class="form-select" name="subcourse_id" id="subcourse_id" required disabled>
-                                <option value="">-- Select Sub-Course --</option>
+                            <select class="form-select" name="subcourse_id" id="subcourse_id" disabled>
+                                <option value="">All Sub-Courses</option>
                             </select>
                         </div>
                         <div class="filter-group">
                             <label for="semester">Semester</label>
-                            <select class="form-select" name="semester" id="semester" required>
-                                <option value="">-- Select Semester --</option>
+                            <select class="form-select" name="semester" id="semester">
+                                <option value="">All Semesters</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -172,8 +156,8 @@
                         </div>
                         <div class="filter-group">
                             <label for="subject_id">Subject</label>
-                            <select class="form-select" name="subject_id" id="subject_id" required disabled>
-                                <option value="">-- Select Subject --</option>
+                            <select class="form-select" name="subject_id" id="subject_id" disabled>
+                                <option value="">All Subjects</option>
                             </select>
                         </div>
                         <div class="filter-actions">
@@ -195,7 +179,7 @@
             </div>
 
             <!-- Results Section -->
-            <div class="section-card">
+            <div class="section-card" id="papers">
                 <div class="section-header d-flex justify-content-between align-items-center">
                     <h2><i class="bi bi-journal-text"></i> Search Results <span class="badge badge-primary" id="resultCount">0</span></h2>
                     <div class="d-flex gap-2">
@@ -222,9 +206,9 @@
                             <tr>
                                 <td colspan="5">
                                     <div class="empty-state">
-                                        <i class="bi bi-funnel"></i>
-                                        <h4>Select filters to search</h4>
-                                        <p>Choose a course, sub-course and subject to see available question papers.</p>
+                                        <i class="fa-solid fa-spinner fa-spin" style="font-size: 32px; color: var(--app-primary, #062b63);"></i>
+                                        <h4 class="mt-3">Loading question papers...</h4>
+                                        <p>Fetching the latest papers from the database.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -239,7 +223,7 @@
                     <h2><i class="bi bi-lightning"></i> Quick Access</h2>
                 </div>
                 <div class="filter-form" style="border: none; padding: 24px;">
-                    <div class="row g-3" id="quickAccessCards">
+                    <div class="quick-access-grid" id="quickAccessCards">
                         <!-- Populated dynamically -->
                     </div>
                 </div>
@@ -281,11 +265,11 @@
                     <button type="button" class="modal-close" onclick="closeViewModal()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="modal-body p-0">
-                    <iframe id="paperIframe" style="width: 100%; height: 70vh; border: none;"></iframe>
+                    <iframe id="paperIframe" style="width: 100%; height: 70vh; border: none;" title="Question paper preview"></iframe>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeViewModal()">Close</button>
-                    <a href="#" class="btn btn-primary" id="downloadFromModal" target="_blank"><i class="bi bi-download me-2"></i> Download</a>
+                    <a href="#" class="btn btn-primary" id="downloadFromModal" target="_blank" rel="noopener"><i class="bi bi-download me-2"></i> Download</a>
                 </div>
             </div>
         </div>
@@ -348,344 +332,860 @@ As Principal, he provides academic and administrative leadership to the institut
 
     <!-- ================= JAVASCRIPT ================= -->
     <script type="module">
-        import { auth } from '../firebase-config.js';
-        import { db } from '../firebase-config.js';
-        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { collection, getDocs, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        import { auth, db } from '../firebase-config.js';
+        import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import {
+            collection,
+            deleteDoc,
+            doc,
+            getDoc,
+            getDocs,
+            increment,
+            query,
+            serverTimestamp,
+            setDoc,
+            updateDoc,
+            where
+        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-        function openLoginModal() { document.getElementById('loginRequiredModal').classList.add('show'); }
-        function closeLoginModal() { document.getElementById('loginRequiredModal').classList.remove('show'); }
+        /* ------------------------------------------------------------------
+           State
+        ------------------------------------------------------------------ */
+        const $ = (id) => document.getElementById(id);
 
-        function openPrincipalBioModal() { document.getElementById('principalBioModal').classList.add('show'); }
-        function closePrincipalBioModal() { document.getElementById('principalBioModal').classList.remove('show'); }
+        let currentUser = null;
+        let uid = '';
+        let bootStarted = false;
 
-        function openCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.add('show'); }
-        function closeCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.remove('show'); }
+        let allPapers = [];
+        let filteredPapers = [];
+        let papersLoadError = null;
 
-        function openChairmanBioModal() { document.getElementById('chairmanBioModal').classList.add('show'); }
-        function closeChairmanBioModal() { document.getElementById('chairmanBioModal').classList.remove('show'); }
+        let downloadedIds = new Set();
+        let savedIds = new Set();
 
-        // Close modals on clicking outside
-        window.addEventListener('click', function (event) {
-            const modals = document.querySelectorAll('.login-modal, .bio-modal');
-            modals.forEach(function (modal) {
-                if (event.target === modal) {
-                    modal.classList.remove('show');
-                }
+        const courseMap = new Map();
+        const subcourseMap = new Map();
+        const subjectMap = new Map();
+        const yearMap = new Map();
+
+        let allCourses = [];
+        let allSubcourses = [];
+        let allSubjects = [];
+
+        /* ------------------------------------------------------------------
+           Helpers
+        ------------------------------------------------------------------ */
+        function esc(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[ch]));
+        }
+
+        function truncate(text, max) {
+            const value = String(text || '');
+            return value.length > max ? value.slice(0, max - 1) + '\u2026' : value;
+        }
+
+        function formatBytes(bytes) {
+            const size = Number(bytes);
+            if (!Number.isFinite(size) || size <= 0) return '';
+            if (size < 1024) return size + ' B';
+            if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB';
+            return (size / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function timestampMs(value) {
+            if (!value) return 0;
+            if (typeof value.toDate === 'function') return value.toDate().getTime();
+            if (typeof value.seconds === 'number') return value.seconds * 1000;
+            const parsed = new Date(value).getTime();
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function formatDate(value) {
+            const ms = timestampMs(value);
+            if (!ms) return '\u2014';
+            return new Date(ms).toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
             });
-        });
+        }
 
-        // Modal functions
+        function debounce(fn, wait) {
+            let timer;
+            return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), wait);
+            };
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-check'} me-2"></i>${esc(message)}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        /* ------------------------------------------------------------------
+           Modal helpers (inline onclick handlers need window functions)
+        ------------------------------------------------------------------ */
+        window.openLoginModal = () => $('loginRequiredModal').classList.add('show');
+        window.closeLoginModal = () => $('loginRequiredModal').classList.remove('show');
+
+        window.openPrincipalBioModal = () => $('principalBioModal').classList.add('show');
+        window.closePrincipalBioModal = () => $('principalBioModal').classList.remove('show');
+
+        window.openCorrespondentBioModal = () => $('correspondentBioModal').classList.add('show');
+        window.closeCorrespondentBioModal = () => $('correspondentBioModal').classList.remove('show');
+
+        window.openChairmanBioModal = () => $('chairmanBioModal').classList.add('show');
+        window.closeChairmanBioModal = () => $('chairmanBioModal').classList.remove('show');
+
+        window.closeViewModal = function () {
+            $('viewPaperModal').classList.remove('show');
+            $('modalBackdrop').classList.remove('show');
+            $('paperIframe').src = '';
+            document.body.style.overflow = '';
+        };
+
         function openViewModal(paper) {
-            document.getElementById('viewModalTitle').textContent = paper.title;
-            document.getElementById('paperIframe').src = paper.fileUrl;
-            document.getElementById('downloadFromModal').href = paper.fileUrl;
-            document.getElementById('downloadFromModal').download = paper.fileName;
-            document.getElementById('viewPaperModal').classList.add('show');
-            document.getElementById('modalBackdrop').classList.add('show');
+            $('viewModalTitle').textContent = paper.title || 'Question Paper';
+            $('paperIframe').src = paper.fileUrl;
+            $('downloadFromModal').href = paper.fileUrl;
+            $('downloadFromModal').download = paper.fileName || 'question-paper.pdf';
+            $('downloadFromModal').dataset.id = paper.id;
+            $('viewPaperModal').classList.add('show');
+            $('modalBackdrop').classList.add('show');
             document.body.style.overflow = 'hidden';
         }
 
-        function closeViewModal() {
-            document.getElementById('viewPaperModal').classList.remove('show');
-            document.getElementById('modalBackdrop').classList.remove('show');
-            document.getElementById('paperIframe').src = '';
-            document.body.style.overflow = '';
+        window.addEventListener('click', (event) => {
+            document.querySelectorAll('.login-modal, .bio-modal').forEach((modal) => {
+                if (event.target === modal) modal.classList.remove('show');
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+            if ($('viewPaperModal').classList.contains('show')) window.closeViewModal();
+            document.querySelectorAll('.login-modal.show, .bio-modal.show').forEach((modal) => {
+                modal.classList.remove('show');
+            });
+        });
+
+        /* ------------------------------------------------------------------
+           Lookup data
+        ------------------------------------------------------------------ */
+        async function loadLookups() {
+            try {
+                const [coursesSnap, subcoursesSnap, subjectsSnap, yearsSnap] = await Promise.all([
+                    getDocs(collection(db, 'courses')),
+                    getDocs(collection(db, 'subcourses')),
+                    getDocs(collection(db, 'subjects')),
+                    getDocs(collection(db, 'academic_years'))
+                ]);
+
+                allCourses = coursesSnap.docs
+                    .map((d) => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => String(a.code || '').localeCompare(String(b.code || '')) || String(a.name || '').localeCompare(String(b.name || '')));
+
+                allSubcourses = subcoursesSnap.docs
+                    .map((d) => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+
+                allSubjects = subjectsSnap.docs
+                    .map((d) => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => String(a.code || '').localeCompare(String(b.code || '')) || String(a.name || '').localeCompare(String(b.name || '')));
+
+                const allYears = yearsSnap.docs
+                    .map((d) => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => String(b.name || '').localeCompare(String(a.name || '')));
+
+                [courseMap, subcourseMap, subjectMap, yearMap].forEach((map) => map.clear());
+                allCourses.forEach((course) => courseMap.set(course.id, course));
+                allSubcourses.forEach((subcourse) => subcourseMap.set(subcourse.id, subcourse));
+                allSubjects.forEach((subject) => subjectMap.set(subject.id, subject));
+                allYears.forEach((year) => yearMap.set(year.id, year));
+            } catch (err) {
+                console.error('Could not load course lookup data:', err);
+                showToast('Some course details could not be loaded.', 'error');
+            }
         }
 
-        // Close modal on backdrop click
-        document.getElementById('modalBackdrop').addEventListener('click', closeViewModal);
+        async function loadUserActivity() {
+            try {
+                const [downloadsSnap, savedSnap] = await Promise.all([
+                    getDocs(query(collection(db, 'downloads'), where('userId', '==', uid))),
+                    getDocs(query(collection(db, 'saved_papers'), where('userId', '==', uid)))
+                ]);
 
-        // Student Dashboard Logic - Firebase
-        (async function() {
-            // Load user info in header
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-                    const snap = await getDoc(doc(db, 'users', user.uid));
-                    if (snap.exists()) {
-                        document.getElementById('headerUserName').textContent = snap.data().name || snap.data().email;
-                        document.getElementById('headerUserEmail').textContent = snap.data().email;
-                    }
-                }
-            });
-
-            // Load dropdown data from Firestore
-            await loadCourses();
-            await loadYears();
-
-            // Chain dropdowns
-            document.getElementById('course_id').addEventListener('change', (e) => {
-                loadSubcourses(e.target.value);
-                document.getElementById('subject_id').innerHTML = '<option value="">-- Select Subject --</option>';
-                document.getElementById('subject_id').disabled = true;
-            });
-
-            document.getElementById('subcourse_id').addEventListener('change', (e) => {
-                loadSubjects(e.target.value);
-            });
-
-            document.getElementById('semester').addEventListener('change', (e) => {
-                loadSubjects(document.getElementById('subcourse_id').value);
-            });
-
-            // Load saved filters from URL
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('course_id')) {
-                document.getElementById('course_id').value = urlParams.get('course_id');
-                loadSubcourses(urlParams.get('course_id'));
+                downloadedIds = new Set(
+                    downloadsSnap.docs.map((d) => d.data().paperId).filter(Boolean)
+                );
+                savedIds = new Set(
+                    savedSnap.docs.map((d) => d.data().paperId).filter(Boolean)
+                );
+            } catch (err) {
+                console.warn('Could not load your downloads/bookmarks:', err);
             }
-            if (urlParams.get('subcourse_id')) {
-                setTimeout(() => {
-                    document.getElementById('subcourse_id').value = urlParams.get('subcourse_id');
-                    loadSubjects(urlParams.get('subcourse_id'));
-                }, 300);
+        }
+
+        async function loadPapers() {
+            try {
+                const snap = await getDocs(collection(db, 'papers'));
+                allPapers = snap.docs
+                    .map((d) => ({ id: d.id, ...d.data() }))
+                    .filter((paper) => paper.status !== 'inactive');
+                papersLoadError = null;
+                return true;
+            } catch (err) {
+                console.error('Could not load question papers:', err);
+                allPapers = [];
+                papersLoadError = err;
+                return false;
             }
-            if (urlParams.get('subject_id')) {
-                setTimeout(() => {
-                    document.getElementById('subject_id').value = urlParams.get('subject_id');
-                    applyFilters();
-                }, 600);
+        }
+
+        /* ------------------------------------------------------------------
+           Dropdown population
+        ------------------------------------------------------------------ */
+        function populateCourseSelect() {
+            const select = $('course_id');
+            select.innerHTML = '<option value="">All Courses</option>';
+            allCourses.forEach((course) => {
+                const label = course.code ? `${course.code} - ${course.name}` : (course.name || course.id);
+                select.insertAdjacentHTML('beforeend', `<option value="${esc(course.id)}">${esc(label)}</option>`);
+            });
+        }
+
+        function resetSubcourseSelect() {
+            const select = $('subcourse_id');
+            select.innerHTML = '<option value="">All Sub-Courses</option>';
+            select.disabled = true;
+        }
+
+        function resetSubjectSelect() {
+            const select = $('subject_id');
+            select.innerHTML = '<option value="">All Subjects</option>';
+            select.disabled = true;
+        }
+
+        function populateSubcourses(courseId) {
+            const select = $('subcourse_id');
+            select.innerHTML = '<option value="">All Sub-Courses</option>';
+
+            if (!courseId) {
+                select.disabled = true;
+                return;
             }
-            if (urlParams.get('semester')) document.getElementById('semester').value = urlParams.get('semester');
 
-            // Filter form submit
-            document.getElementById('filterForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                applyFilters();
-            });
-
-            // Reset filters
-            document.getElementById('resetFilters').addEventListener('click', function() {
-                document.getElementById('filterForm').reset();
-                document.getElementById('subcourse_id').disabled = true;
-                document.getElementById('subject_id').disabled = true;
-                document.getElementById('paperSearch').value = '';
-                filteredPapers = [];
-                renderPapers();
-                updateStats();
-            });
-
-            // Search input
-            document.getElementById('paperSearch').addEventListener('input', debounce(function() {
-                applyFilters();
-            }, 300));
-
-            // Sort select
-            document.getElementById('sortSelect').addEventListener('change', function() {
-                renderPapers();
-            });
-
-            let allPapers = [];
-            let filteredPapers = [];
-
-            async function loadCourses() {
-                const snap = await getDocs(query(collection(db, 'courses'), orderBy('code')));
-                const sel = document.getElementById('course_id');
-                sel.innerHTML = '<option value="">-- Select Course --</option>';
-                snap.docs.forEach(d => {
-                    const c = d.data();
-                    sel.innerHTML += `<option value="${d.id}">${c.code} - ${c.name}</option>`;
+            allSubcourses
+                .filter((subcourse) => subcourse.courseId === courseId)
+                .forEach((subcourse) => {
+                    select.insertAdjacentHTML('beforeend', `<option value="${esc(subcourse.id)}">${esc(subcourse.name)}</option>`);
                 });
+
+            select.disabled = false;
+        }
+
+        function populateSubjects(subcourseId) {
+            const select = $('subject_id');
+            select.innerHTML = '<option value="">All Subjects</option>';
+
+            if (!subcourseId) {
+                select.disabled = true;
+                return;
             }
 
-            async function loadSubcourses(courseId) {
-                const sel = document.getElementById('subcourse_id');
-                sel.innerHTML = '<option value="">-- Select Sub-Course --</option>';
-                sel.disabled = true;
-                if (!courseId) return;
+            const semester = $('semester').value;
 
-                const snap = await getDocs(query(collection(db, 'subcourses'), where('courseId', '==', courseId), orderBy('name')));
-                snap.docs.forEach(d => {
-                    const s = d.data();
-                    sel.innerHTML += `<option value="${d.id}">${s.name}</option>`;
+            allSubjects
+                .filter((subject) => subject.subcourseId === subcourseId)
+                .filter((subject) => {
+                    if (!semester) return true;
+                    if (subject.semester == null || subject.semester === '') return true;
+                    return String(subject.semester) === semester;
+                })
+                .forEach((subject) => {
+                    const label = subject.code ? `${subject.code} - ${subject.name}` : (subject.name || subject.id);
+                    select.insertAdjacentHTML('beforeend', `<option value="${esc(subject.id)}">${esc(label)}</option>`);
                 });
-                sel.disabled = false;
+
+            select.disabled = false;
+        }
+
+        function restoreFiltersFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+
+            const semester = params.get('semester');
+            if (semester && ['1', '2', '3', '4', '5', '6'].includes(semester)) {
+                $('semester').value = semester;
             }
 
-            async function loadSubjects(subcourseId) {
-                const sel = document.getElementById('subject_id');
-                sel.innerHTML = '<option value="">-- Select Subject --</option>';
-                sel.disabled = true;
-                if (!subcourseId) return;
+            const courseId = params.get('course_id');
+            if (!courseId || !courseMap.has(courseId)) return;
 
-                const semester = document.getElementById('semester').value;
-                const snap = await getDocs(query(collection(db, 'subjects'), where('subcourseId', '==', subcourseId), orderBy('code')));
-                sel.innerHTML = '<option value="">-- Select Subject --</option>';
-                snap.docs.forEach(d => {
-                    const s = d.data();
-                    sel.innerHTML += `<option value="${d.id}">${s.code} - ${s.name}</option>`;
-                });
-                sel.disabled = false;
+            $('course_id').value = courseId;
+            populateSubcourses(courseId);
+
+            const subcourseId = params.get('subcourse_id');
+            if (!subcourseId || !subcourseMap.has(subcourseId)) return;
+            if (subcourseMap.get(subcourseId).courseId !== courseId) return;
+
+            $('subcourse_id').value = subcourseId;
+            populateSubjects(subcourseId);
+
+            const subjectId = params.get('subject_id');
+            if (subjectId && subjectMap.has(subjectId) && subjectMap.get(subjectId).subcourseId === subcourseId) {
+                $('subject_id').value = subjectId;
             }
+        }
 
-            async function loadYears() {
-                const snap = await getDocs(query(collection(db, 'academic_years'), orderBy('name', 'desc')));
-                // Years can be used for filtering if needed
-            }
+        /* ------------------------------------------------------------------
+           Display labels
+        ------------------------------------------------------------------ */
+        function courseLabel(paper) {
+            const course = courseMap.get(paper.courseId);
+            return course ? (course.name || course.code) : (paper.courseId || '\u2014');
+        }
 
-            async function applyFilters() {
-                const courseId = document.getElementById('course_id').value;
-                const subcourseId = document.getElementById('subcourse_id').value;
-                const subjectId = document.getElementById('subject_id').value;
-                const semester = document.getElementById('semester').value;
-                const search = document.getElementById('paperSearch').value.toLowerCase();
+        function subcourseLabel(paper) {
+            const subcourse = subcourseMap.get(paper.subcourseId);
+            return subcourse ? (subcourse.name || '') : '';
+        }
 
-                // Update URL without reload
-                const params = new URLSearchParams();
-                if (courseId) params.set('course_id', courseId);
-                if (subcourseId) params.set('subcourse_id', subcourseId);
-                if (subjectId) params.set('subject_id', subjectId);
-                if (semester) params.set('semester', semester);
-                window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+        function subjectLabel(paper) {
+            const subject = subjectMap.get(paper.subjectId);
+            return subject
+                ? [subject.code, subject.name].filter(Boolean).join(' - ')
+                : (paper.subjectId || 'Unknown subject');
+        }
 
-                // Build Firestore query
-                let q = query(collection(db, 'papers'), orderBy('createdAt', 'desc'));
-                
-                if (courseId) q = query(q, where('courseId', '==', courseId));
-                if (subcourseId) q = query(q, where('subcourseId', '==', subcourseId));
-                if (subjectId) q = query(q, where('subjectId', '==', subjectId));
-                if (semester) q = query(q, where('semester', '==', parseInt(semester)));
+        function yearLabel(paper) {
+            const year = yearMap.get(paper.yearId);
+            return year ? (year.name || year.id) : (paper.yearId || '\u2014');
+        }
 
-                const snap = await getDocs(q);
-                allPapers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        /* ------------------------------------------------------------------
+           Filtering, rendering, stats
+        ------------------------------------------------------------------ */
+        function applyFilters() {
+            const courseId = $('course_id').value;
+            const subcourseId = $('subcourse_id').value;
+            const subjectId = $('subject_id').value;
+            const semester = $('semester').value;
+            const search = $('paperSearch').value.trim().toLowerCase();
 
-                // Client-side search filter
+            filteredPapers = allPapers.filter((paper) => {
+                if (courseId && paper.courseId !== courseId) return false;
+                if (subcourseId && paper.subcourseId !== subcourseId) return false;
+                if (subjectId && paper.subjectId !== subjectId) return false;
+                if (semester && String(paper.semester ?? '') !== semester) return false;
+
                 if (search) {
-                    filteredPapers = allPapers.filter(paper => 
-                        paper.title.toLowerCase().includes(search) || 
-                        (paper.description && paper.description.toLowerCase().includes(search))
-                    );
-                } else {
-                    filteredPapers = allPapers;
+                    const haystack = [
+                        paper.title,
+                        paper.description,
+                        paper.fileName,
+                        subjectLabel(paper),
+                        courseLabel(paper),
+                        subcourseLabel(paper)
+                    ].filter(Boolean).join(' ').toLowerCase();
+
+                    if (!haystack.includes(search)) return false;
                 }
 
-                renderPapers();
-                updateStats();
+                return true;
+            });
+
+            const params = new URLSearchParams();
+            if (courseId) params.set('course_id', courseId);
+            if (subcourseId) params.set('subcourse_id', subcourseId);
+            if (subjectId) params.set('subject_id', subjectId);
+            if (semester) params.set('semester', semester);
+
+            const searchQuery = params.toString();
+            window.history.replaceState({}, '', searchQuery ? `${window.location.pathname}?${searchQuery}` : window.location.pathname);
+
+            renderPapers();
+            updateStats();
+        }
+
+        function renderPapers() {
+            const tbody = $('papersBody');
+            const sortBy = $('sortSelect').value;
+
+            $('resultCount').textContent = filteredPapers.length;
+
+            if (filteredPapers.length === 0) {
+                $('quickAccessSection').style.display = 'none';
+                const noPapers = allPapers.length === 0;
+
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                ${noPapers ? `
+                                    <i class="fa-solid fa-book-open"></i>
+                                    <h4>No question papers available yet</h4>
+                                    <p>Papers uploaded by staff will appear here automatically.</p>
+                                ` : `
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <h4>No papers match your filters</h4>
+                                    <p>Try a different course, subject, semester or search term.</p>
+                                    <button type="button" class="btn btn-outline mt-2" data-action="reset-filters">
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i> Reset Filters
+                                    </button>
+                                `}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
             }
 
-            function renderPapers() {
-                const tbody = document.getElementById('papersBody');
-                const countEl = document.getElementById('resultCount');
-                const sortBy = document.getElementById('sortSelect').value;
-
-                countEl.textContent = filteredPapers.length;
-
-                if (filteredPapers.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="5">
-                                <div class="empty-state">
-                                    <i class="bi bi-search"></i>
-                                    <h4>No papers found</h4>
-                                    <p>Try adjusting your filters or search terms.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    return;
+            const sorted = [...filteredPapers].sort((a, b) => {
+                switch (sortBy) {
+                    case 'oldest':
+                        return timestampMs(a.createdAt) - timestampMs(b.createdAt);
+                    case 'downloads':
+                        return (Number(b.downloads) || 0) - (Number(a.downloads) || 0);
+                    case 'title':
+                        return String(a.title || '').localeCompare(String(b.title || ''));
+                    case 'newest':
+                    default:
+                        return timestampMs(b.createdAt) - timestampMs(a.createdAt);
                 }
+            });
 
-                // Sort papers
-                const sorted = [...filteredPapers].sort((a, b) => {
-                    switch (sortBy) {
-                        case 'newest': return new Date(b.createdAt?.seconds * 1000 || 0) - new Date(a.createdAt?.seconds * 1000 || 0);
-                        case 'oldest': return new Date(a.createdAt?.seconds * 1000 || 0) - new Date(b.createdAt?.seconds * 1000 || 0);
-                        case 'downloads': return (b.downloads || 0) - (a.downloads || 0);
-                        case 'title': return a.title.localeCompare(b.title);
-                    }
-                });
+            tbody.innerHTML = sorted.map((paper) => {
+                const downloads = Number(paper.downloads) || 0;
+                const views = Number(paper.views) || 0;
+                const size = formatBytes(paper.fileSize);
+                const saved = savedIds.has(paper.id);
+                const subcourse = subcourseLabel(paper);
 
-                tbody.innerHTML = sorted.map(paper => `
+                return `
                     <tr>
                         <td>
-                            <div class="paper-title">${paper.title}</div>
+                            <div class="paper-title">${esc(paper.title || 'Untitled paper')}</div>
                             <div class="paper-meta">
-                                <span><i class="bi bi-tag"></i> ${paper.subjectId}</span>
-                                <span><i class="bi bi-calendar"></i> ${paper.yearId}</span>
+                                <span><i class="bi bi-tag"></i> ${esc(subjectLabel(paper))}</span>
+                                <span><i class="bi bi-calendar"></i> ${esc(formatDate(paper.createdAt))}</span>
+                                ${size ? `<span><i class="bi bi-hdd"></i> ${esc(size)}</span>` : ''}
                             </div>
                         </td>
                         <td>
-                            <span class="badge badge-primary">${paper.courseId}</span>
-                            <span class="badge badge-info" style="margin-top: 4px; display: inline-block;">${paper.subcourseId}</span>
+                            <span class="badge badge-primary">${esc(courseLabel(paper))}</span>
+                            ${subcourse ? `<span class="badge badge-info" style="margin-top: 4px; display: inline-block;">${esc(subcourse)}</span>` : ''}
                         </td>
                         <td>
-                            <span>${paper.yearId}</span><br>
-                            <small>Semester ${paper.semester}</small>
+                            <span>${esc(yearLabel(paper))}</span><br>
+                            <small>Semester ${paper.semester != null && paper.semester !== '' ? esc(paper.semester) : '\u2014'}</small>
                         </td>
                         <td>
-                            <span class="fw-bold">${paper.downloads || 0}</span>
-                            <small class="text-muted"> downloads</small>
+                            <span class="fw-bold">${downloads}</span>
+                            <small class="text-muted"> downloads</small><br>
+                            <small class="text-info">${views} views</small>
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn-icon" onclick="viewPaper('${paper.id}')" title="View">
+                                <button type="button" class="btn-icon" data-action="view" data-id="${esc(paper.id)}" title="View paper">
                                     <i class="bi bi-eye"></i>
                                 </button>
-                                <button class="btn-icon" onclick="downloadPaper('${paper.id}')" title="Download">
+                                <button type="button" class="btn-icon" data-action="download" data-id="${esc(paper.id)}" title="Download paper">
                                     <i class="bi bi-download"></i>
                                 </button>
-                                <button class="btn-icon" onclick="toggleSave('${paper.id}')" title="Save">
-                                    <i class="bi bi-bookmark"></i>
+                                <button type="button" class="btn-icon ${saved ? 'text-warning' : ''}" data-action="save" data-id="${esc(paper.id)}" title="${saved ? 'Remove bookmark' : 'Save for later'}">
+                                    <i class="bi ${saved ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
-                `).join('');
+                `;
+            }).join('');
+
+            updateQuickAccess();
+        }
+
+        function updateQuickAccess() {
+            const section = $('quickAccessSection');
+            const container = $('quickAccessCards');
+
+            const top = [...filteredPapers]
+                .sort((a, b) => (Number(b.downloads) || 0) - (Number(a.downloads) || 0))
+                .slice(0, 4);
+
+            if (top.length === 0) {
+                section.style.display = 'none';
+                return;
             }
 
-            function updateStats() {
-                document.getElementById('totalPapers').textContent = allPapers.length;
-                document.getElementById('myDownloads').textContent = '0'; // Track separately if needed
-                document.getElementById('savedPapers').textContent = '0'; // Track separately if needed
+            section.style.display = 'block';
+            container.innerHTML = top.map((paper) => `
+                <div class="quick-access-card">
+                    <div class="quick-access-icon"><i class="bi bi-file-earmark-pdf"></i></div>
+                    <div class="quick-access-title" title="${esc(paper.title || '')}">${esc(truncate(paper.title || 'Untitled paper', 58))}</div>
+                    <div class="quick-access-meta">${esc(subjectLabel(paper))} &bull; Semester ${paper.semester != null && paper.semester !== '' ? esc(paper.semester) : '\u2014'}</div>
+                    <div class="quick-access-actions">
+                        <button type="button" class="btn btn-sm btn-primary" data-action="view" data-id="${esc(paper.id)}">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" data-action="download" data-id="${esc(paper.id)}">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            $('totalPapers').textContent = allPapers.length;
+            $('myDownloads').textContent = downloadedIds.size;
+            $('savedPapers').textContent = savedIds.size;
+        }
+
+        function setTableLoading() {
+            $('resultCount').textContent = '\u2026';
+            $('quickAccessSection').style.display = 'none';
+            $('papersBody').innerHTML = `
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-spinner fa-spin" style="font-size: 32px; color: var(--app-primary, #062b63);"></i>
+                            <h4 class="mt-3">Loading question papers...</h4>
+                            <p>Fetching the latest papers from the database.</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function setTableError(err) {
+            $('resultCount').textContent = '0';
+            $('quickAccessSection').style.display = 'none';
+            $('papersBody').innerHTML = `
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-triangle-exclamation" style="color: #dc3545;"></i>
+                            <h4>Could not load question papers</h4>
+                            <p>${esc(err && err.message ? err.message : 'Please check your connection and try again.')}</p>
+                            <button type="button" class="btn btn-outline mt-2" data-action="retry">
+                                <i class="bi bi-arrow-clockwise me-2"></i> Try Again
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        /* ------------------------------------------------------------------
+           Paper actions
+        ------------------------------------------------------------------ */
+        function findPaper(id) {
+            return allPapers.find((paper) => paper.id === id) || null;
+        }
+
+        function viewPaper(paper) {
+            if (!paper || !paper.fileUrl) {
+                showToast('The PDF file is not available for this paper.', 'error');
+                return;
             }
 
-            // Global functions
-            window.viewPaper = function(id) {
-                const paper = allPapers.find(p => p.id === id);
-                if (paper) openViewModal(paper);
-            };
+            openViewModal(paper);
 
-            window.downloadPaper = function(id) {
-                const paper = allPapers.find(p => p.id === id);
-                if (!paper) return;
-                
-                // Trigger download
-                const a = document.createElement('a');
-                a.href = paper.fileUrl;
-                a.download = paper.fileName;
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                showToast('Download started: ' + paper.fileName);
-            };
+            paper.views = (Number(paper.views) || 0) + 1;
+            updateDoc(doc(db, 'papers', paper.id), { views: increment(1) })
+                .catch((err) => console.warn('Could not update view count:', err));
+        }
 
-            window.toggleSave = function(id) {
-                showToast('Save feature coming soon!');
-            };
-
-            function showToast(message) {
-                const toast = document.createElement('div');
-                toast.className = 'toast-notification';
-                toast.innerHTML = `<i class="bi bi-check-circle me-2"></i>${message}`;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.classList.add('show'), 10);
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
+        function registerDownload(paper, triggerLink) {
+            if (!paper || !paper.fileUrl) {
+                showToast('The PDF file is not available for this paper.', 'error');
+                return;
             }
 
-            function debounce(func, wait) {
-                let timeout;
-                return function(...args) {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => func.apply(this, args), wait);
-                };
+            if (triggerLink) {
+                const link = document.createElement('a');
+                link.href = paper.fileUrl;
+                link.download = paper.fileName || 'question-paper.pdf';
+                link.target = '_blank';
+                link.rel = 'noopener';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
             }
-        })();
+
+            paper.downloads = (Number(paper.downloads) || 0) + 1;
+            updateDoc(doc(db, 'papers', paper.id), { downloads: increment(1) })
+                .catch((err) => console.warn('Could not update download count:', err));
+
+            if (!downloadedIds.has(paper.id)) {
+                downloadedIds.add(paper.id);
+
+                setDoc(doc(db, 'downloads', `${uid}_${paper.id}`), {
+                    userId: uid,
+                    paperId: paper.id,
+                    createdAt: serverTimestamp()
+                }).catch((err) => {
+                    console.warn('Could not save download history:', err);
+                    downloadedIds.delete(paper.id);
+                    updateStats();
+                });
+            }
+
+            updateStats();
+            renderPapers();
+            showToast('Download started: ' + (paper.fileName || paper.title || 'question paper'));
+        }
+
+        async function toggleSave(paper) {
+            if (!paper) return;
+
+            const isSaved = savedIds.has(paper.id);
+            const key = `${uid}_${paper.id}`;
+            const docRef = doc(db, 'saved_papers', key);
+
+            if (isSaved) {
+                savedIds.delete(paper.id);
+                updateStats();
+                renderPapers();
+
+                try {
+                    await deleteDoc(docRef);
+                    showToast('Removed from saved papers.');
+                } catch (err) {
+                    console.error('Could not remove bookmark:', err);
+                    savedIds.add(paper.id);
+                    updateStats();
+                    renderPapers();
+                    showToast('Could not remove the bookmark: ' + err.message, 'error');
+                }
+                return;
+            }
+
+            savedIds.add(paper.id);
+            updateStats();
+            renderPapers();
+
+            try {
+                await setDoc(docRef, {
+                    userId: uid,
+                    paperId: paper.id,
+                    createdAt: serverTimestamp()
+                });
+                showToast('Saved for later.');
+            } catch (err) {
+                console.error('Could not save paper:', err);
+                savedIds.delete(paper.id);
+                updateStats();
+                renderPapers();
+                showToast('Could not save the paper: ' + err.message, 'error');
+            }
+        }
+
+        /* ------------------------------------------------------------------
+           Events
+        ------------------------------------------------------------------ */
+        function resetFilters() {
+            $('filterForm').reset();
+            $('course_id').value = '';
+            $('semester').value = '';
+            $('paperSearch').value = '';
+            resetSubcourseSelect();
+            resetSubjectSelect();
+            applyFilters();
+        }
+
+        async function retryLoad() {
+            setTableLoading();
+            const loaded = await loadPapers();
+            if (loaded) {
+                applyFilters();
+            } else {
+                setTableError(papersLoadError);
+                updateStats();
+            }
+        }
+
+        async function onPaperAction(event) {
+            const trigger = event.target && event.target.closest ? event.target.closest('[data-action]') : null;
+            if (!trigger) return;
+
+            const action = trigger.dataset.action;
+
+            if (action === 'reset-filters') {
+                resetFilters();
+                return;
+            }
+
+            if (action === 'retry') {
+                await retryLoad();
+                return;
+            }
+
+            const paper = findPaper(trigger.dataset.id);
+            if (!paper) return;
+
+            if (action === 'view') viewPaper(paper);
+            else if (action === 'download') registerDownload(paper, true);
+            else if (action === 'save') await toggleSave(paper);
+        }
+
+        function bindEvents() {
+            $('filterForm').addEventListener('submit', (event) => {
+                event.preventDefault();
+                applyFilters();
+            });
+
+            $('resetFilters').addEventListener('click', resetFilters);
+
+            $('paperSearch').addEventListener('input', debounce(applyFilters, 250));
+
+            $('sortSelect').addEventListener('change', renderPapers);
+
+            $('course_id').addEventListener('change', () => {
+                const courseId = $('course_id').value;
+                resetSubjectSelect();
+                if (!courseId) {
+                    resetSubcourseSelect();
+                } else {
+                    populateSubcourses(courseId);
+                }
+                applyFilters();
+            });
+
+            $('subcourse_id').addEventListener('change', () => {
+                const subcourseId = $('subcourse_id').value;
+                if (!subcourseId) {
+                    resetSubjectSelect();
+                } else {
+                    populateSubjects(subcourseId);
+                }
+                applyFilters();
+            });
+
+            $('semester').addEventListener('change', () => {
+                const subcourseId = $('subcourse_id').value;
+                if (subcourseId) populateSubjects(subcourseId);
+                applyFilters();
+            });
+
+            $('subject_id').addEventListener('change', applyFilters);
+
+            $('papersBody').addEventListener('click', onPaperAction);
+            $('quickAccessCards').addEventListener('click', onPaperAction);
+
+            $('modalBackdrop').addEventListener('click', window.closeViewModal);
+
+            $('downloadFromModal').addEventListener('click', () => {
+                const paper = findPaper($('downloadFromModal').dataset.id);
+                if (paper) registerDownload(paper, false);
+            });
+
+            // This project uses its own dropdown styles (no Bootstrap JS), so toggle it manually.
+            const userDropdown = $('userDropdown');
+            const userMenu = userDropdown ? userDropdown.parentElement.querySelector('.dropdown-menu') : null;
+            if (userDropdown && userMenu) {
+                userDropdown.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const isOpen = userMenu.classList.toggle('show');
+                    userDropdown.setAttribute('aria-expanded', String(isOpen));
+                });
+
+                document.addEventListener('click', (event) => {
+                    if (!event.target.closest('.dropdown')) {
+                        userMenu.classList.remove('show');
+                        userDropdown.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+        }
+
+        /* ------------------------------------------------------------------
+           Auth + boot
+        ------------------------------------------------------------------ */
+        function renderUser(profile, user) {
+            $('headerUserName').textContent = profile.name || user.email || 'Student';
+            $('headerUserEmail').textContent = profile.email || user.email || '';
+        }
+
+        function renderEmailBadge(user) {
+            const badge = $('emailStatusBadge');
+
+            if (user.emailVerified) {
+                badge.className = 'badge badge-success';
+                badge.innerHTML = '<i class="bi bi-check-circle"></i> Email Verified';
+            } else {
+                badge.className = 'badge badge-warning';
+                badge.title = 'Please verify your email address from the link sent to your inbox.';
+                badge.innerHTML = '<i class="bi bi-exclamation-circle"></i> Email Not Verified';
+            }
+        }
+
+        async function init() {
+            bindEvents();
+            setTableLoading();
+
+            const [papersLoaded] = await Promise.all([
+                loadPapers(),
+                loadLookups(),
+                loadUserActivity()
+            ]);
+
+            populateCourseSelect();
+            restoreFiltersFromUrl();
+
+            if (papersLoaded) {
+                applyFilters();
+            } else {
+                setTableError(papersLoadError);
+                updateStats();
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.replace('../login.html');
+                return;
+            }
+
+            if (bootStarted) return;
+            bootStarted = true;
+            currentUser = user;
+            uid = user.uid;
+
+            try {
+                const snap = await getDoc(doc(db, 'users', user.uid));
+
+                if (!snap.exists() || snap.data().role !== 'student') {
+                    await signOut(auth).catch(() => {});
+                    window.location.replace('../login.html');
+                    return;
+                }
+
+                renderUser(snap.data(), user);
+                renderEmailBadge(user);
+                await init();
+            } catch (err) {
+                console.error('Could not initialise the student dashboard:', err);
+                showToast('Could not load your account: ' + err.message, 'error');
+                setTableError(err);
+                updateStats();
+            }
+        });
     </script>
 
     <style>
@@ -700,9 +1200,9 @@ As Principal, he provides academic and administrative leadership to the institut
             z-index: 1050;
             overflow-y: auto;
         }
-        
+
         .modal.show { display: flex; align-items: center; justify-content: center; padding: 20px; }
-        
+
         .modal-backdrop {
             display: none;
             position: fixed;
@@ -713,9 +1213,9 @@ As Principal, he provides academic and administrative leadership to the institut
             background: rgba(0,0,0,0.5);
             z-index: 1040;
         }
-        
+
         .modal-backdrop.show { display: block; }
-        
+
         .modal-dialog {
             max-width: 900px;
             margin: auto;
@@ -726,11 +1226,11 @@ As Principal, he provides academic and administrative leadership to the institut
             transform: scale(0.9);
             transition: transform 0.2s ease;
         }
-        
+
         .modal.show .modal-dialog { transform: scale(1); }
-        
+
         .modal-content { display: flex; flex-direction: column; height: 100%; }
-        
+
         .modal-header {
             display: flex;
             align-items: center;
@@ -738,7 +1238,7 @@ As Principal, he provides academic and administrative leadership to the institut
             padding: 16px 24px;
             border-bottom: 1px solid var(--app-border);
         }
-        
+
         .modal-header .modal-close {
             background: none;
             border: none;
@@ -753,14 +1253,14 @@ As Principal, he provides academic and administrative leadership to the institut
             justify-content: center;
             transition: all 0.2s;
         }
-        
+
         .modal-header .modal-close:hover {
             background: var(--app-bg);
             color: var(--app-text);
         }
-        
+
         .modal-body { flex: 1; overflow: hidden; }
-        
+
         .modal-footer {
             display: flex;
             justify-content: flex-end;
@@ -768,7 +1268,50 @@ As Principal, he provides academic and administrative leadership to the institut
             padding: 16px 24px;
             border-top: 1px solid var(--app-border);
         }
+
+        /* Quick access cards */
+        .quick-access-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .quick-access-card {
+            background: var(--app-card, #ffffff);
+            border: 1px solid var(--app-border, #e5e7eb);
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quick-access-icon {
+            font-size: 26px;
+            color: var(--app-primary, #062b63);
+        }
+
+        .quick-access-title {
+            font-weight: 600;
+            color: var(--app-text, #1f2937);
+            line-height: 1.35;
+        }
+
+        .quick-access-meta {
+            font-size: 13px;
+            color: var(--app-text-light, #6b7280);
+            flex: 1;
+        }
+
+        .quick-access-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        @media (max-width: 520px) {
+            .quick-access-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </body>
 </html>
-

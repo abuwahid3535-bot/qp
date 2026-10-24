@@ -8,7 +8,208 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .staff-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(6, 43, 99, 0.1);
+            color: var(--app-primary, #062b63);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+
+        .dropdown-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #headerUserName {
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        header nav a[aria-current="page"] {
+            color: var(--app-primary-light);
+            font-weight: 600;
+        }
+
+        #submitBtn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .dashboard-title h1 i,
+        .dashboard-header .btn i,
+        .upload-actions .btn i {
+            margin-right: 8px;
+        }
+
+        .upload-note i {
+            margin-right: 6px;
+        }
+
+        .dashboard-main > .container {
+            padding-left: 20px;
+            padding-right: 20px;
+            box-sizing: border-box;
+        }
+
+        .dashboard-main > .container > .dashboard-header {
+            max-width: 960px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .upload-shell {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .upload-form-body {
+            padding: 24px;
+        }
+
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .upload-grid .filter-group {
+            min-width: 0;
+        }
+
+        .upload-grid .form-control,
+        .upload-grid .form-select {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .upload-grid textarea.form-control {
+            min-height: 96px;
+            resize: vertical;
+        }
+
+        .upload-col-3 {
+            grid-column: span 3;
+        }
+
+        .upload-col-full {
+            grid-column: 1 / -1;
+        }
+
+        .required-mark {
+            color: #dc2626;
+        }
+
+        .optional-mark {
+            color: var(--app-text-light, #6b7280);
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .upload-help {
+            margin-top: 6px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--app-text-light, #6b7280);
+        }
+
+        .form-error {
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 10px;
+            background: rgba(220, 38, 38, 0.08);
+            color: #b91c1c;
+            font-size: 14px;
+        }
+
+        .form-error[hidden],
+        .upload-progress[hidden] {
+            display: none;
+        }
+
+        .upload-progress {
+            margin-top: 24px;
+        }
+
+        .upload-progress-track {
+            height: 10px;
+            overflow: hidden;
+            border: 1px solid var(--app-border, #e5e7eb);
+            border-radius: 999px;
+            background: var(--app-bg, #f3f4f6);
+        }
+
+        .upload-progress-fill {
+            width: 0;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--app-primary, #062b63), var(--app-primary-light, #2563eb));
+            transition: width 0.25s ease;
+        }
+
+        .upload-progress-text {
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--app-text-light, #6b7280);
+        }
+
+        .upload-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 26px;
+        }
+
+        .upload-actions a.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .upload-note {
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--app-text-light, #6b7280);
+        }
+
+        @media (max-width: 767.98px) {
+            #headerUserName {
+                display: none;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .upload-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .upload-col-3 {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .upload-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .upload-form-body {
+                padding: 18px;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- ================= TOP BAR ================= -->
@@ -38,7 +239,8 @@
                     <span>MR. Sunil<br>(Chairman)</span>
                 </div>
             </div>
-            
+
+            <!-- COLLEGE LOGO -->
             <div class="logo">
                 <img src="/assets/img/college.png" alt="Mother Theresa Logo" onerror="this.style.display='none'; this.parentNode.innerText='MT';">
             </div>
@@ -49,46 +251,75 @@
             </div>
         </div>
 
+        <div class="header-principal">
+            <div class="profile-item" onclick="openPrincipalBioModal()">
+                <img src="/assets/img/principal.jfif" alt="Principal">
+                <span>Principal<br>Sri S. Madhusudhana Rao</span>
+            </div>
+        </div>
+
         <div class="nav-right-container">
             <nav>
-                <a href="index.html">Home</a>
-                <a href="#papers">Question Papers</a>
+                <a href="../index.html">Home</a>
+                <a href="upload.html" aria-current="page">Upload Paper</a>
+                <a href="manage.html">Manage Papers</a>
             </nav>
+            <div class="header-profiles-right">
+                <div class="dropdown">
+                    <button class="btn btn-ghost dropdown-toggle d-flex align-items-center gap-2" type="button" id="userDropdown" aria-expanded="false">
+                        <span class="staff-avatar"><i class="bi bi-person"></i></span>
+                        <span class="d-none d-md-inline" id="headerUserName">Staff</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><h6 class="dropdown-header" id="headerUserEmail"></h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="../profile.html"><i class="bi bi-person me-2"></i> Profile</a></li>
+                        <li><a class="dropdown-item text-danger" href="../logout.html"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </header>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-9">
-            <div class="card">
-                <div class="card-header bg-white py-3 d-flex align-items-center">
-                    <i class="bi bi-cloud-arrow-up fs-4 me-2 text-primary"></i>
-                    <div>
-                        <h2 class="h5 fw-bold mb-0">Upload a Question Paper</h2>
-                        <span class="text-muted small">Select the course, academic year, sub-course and subject of the paper.</span>
-                    </div>
+    <main class="dashboard-main">
+        <div class="container">
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1><i class="bi bi-cloud-arrow-up me-2"></i> Upload Question Paper</h1>
+                    <p>Add a previous year question paper to the college portal</p>
                 </div>
-                <div class="card-body p-4">
-                    <form id="uploadForm" enctype="multipart/form-data" novalidate>
+                <a href="manage.html" class="btn btn-outline"><i class="bi bi-collection me-2"></i> My Uploaded Papers</a>
+            </div>
 
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold" for="course_id">Course</label>
+            <div class="upload-shell">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2><i class="bi bi-file-earmark-pdf"></i> Paper Details</h2>
+                        <span class="badge badge-primary">PDF up to 10 MB</span>
+                    </div>
+
+                    <form id="uploadForm" class="upload-form-body" enctype="multipart/form-data" novalidate>
+                        <div class="form-error" id="formError" role="alert" tabindex="-1" hidden></div>
+
+                        <div class="upload-grid">
+                            <div class="filter-group">
+                                <label for="course_id">Course <span class="required-mark">*</span></label>
                                 <select class="form-select" name="course_id" id="course_id" required>
                                     <option value="">-- Select course --</option>
                                 </select>
                             </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold" for="subcourse_id">Sub-Course (Specialisation)</label>
+                            <div class="filter-group">
+                                <label for="subcourse_id">Sub-Course <span class="required-mark">*</span></label>
                                 <select class="form-select" name="subcourse_id" id="subcourse_id" required disabled>
                                     <option value="">-- Select sub-course --</option>
                                 </select>
                             </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold" for="semester">Semester</label>
+                            <div class="filter-group">
+                                <label for="semester">Semester <span class="required-mark">*</span></label>
                                 <select class="form-select" name="semester" id="semester" required>
-                                    <option value="">-- Semester --</option>
+                                    <option value="">-- Select semester --</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
@@ -98,52 +329,64 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold" for="subject_id">Subject</label>
+                            <div class="filter-group">
+                                <label for="subject_id">Subject <span class="required-mark">*</span></label>
                                 <select class="form-select" name="subject_id" id="subject_id" required disabled>
                                     <option value="">-- Select subject --</option>
                                 </select>
                             </div>
 
-                            <div class="col-md-12">
-                                <label class="form-label fw-semibold" for="title">Title <span class="text-muted fw-normal">(optional)</span></label>
-                                <input type="text" class="form-control" id="title" name="title"
-                                       placeholder="e.g. Programming in C - Semester End Examination - 2024-2025">
-                                <div class="form-text">Leave blank to auto-generate from the subject, semester and year.</div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label class="form-label fw-semibold" for="description">Short description <span class="text-muted fw-normal">(optional)</span></label>
-                                <textarea class="form-control" id="description" name="description" rows="3"
-                                          placeholder="e.g. Semester end examination paper, held in May 2025"></textarea>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label class="form-label fw-semibold" for="paper_file">Question paper PDF</label>
-                                <input type="file" class="form-control" id="paper_file"
-                                       name="paper_file" accept=".pdf,application/pdf" required>
-                                <div class="form-text">Only PDF files up to 10 MB are allowed.</div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label class="form-label fw-semibold" for="year_id">Academic Year</label>
+                            <div class="filter-group">
+                                <label for="year_id">Academic Year <span class="required-mark">*</span></label>
                                 <select class="form-select" name="year_id" id="year_id" required>
-                                    <option value="">-- Year --</option>
+                                    <option value="">-- Select year --</option>
                                 </select>
+                            </div>
+
+                            <div class="filter-group upload-col-3">
+                                <label for="paper_file">Question Paper PDF <span class="required-mark">*</span></label>
+                                <input type="file" class="form-control" id="paper_file" name="paper_file" accept=".pdf,application/pdf" required>
+                                <div class="upload-help" id="fileHelp">Only PDF files, maximum 10 MB.</div>
+                            </div>
+
+                            <div class="filter-group upload-col-full">
+                                <label for="title">Title <span class="optional-mark">(optional)</span></label>
+                                <input type="text" class="form-control" id="title" name="title" maxlength="150"
+                                       placeholder="e.g. Programming in C - Semester 1 - 2024-2025">
+                                <div class="upload-help" id="titleHelp">Leave blank to auto-generate from the selected subject, semester and year.</div>
+                            </div>
+
+                            <div class="filter-group upload-col-full">
+                                <label for="description">Short Description <span class="optional-mark">(optional)</span></label>
+                                <textarea class="form-control" id="description" name="description" rows="3" maxlength="500"
+                                          placeholder="e.g. Semester end examination paper, held in May 2025"></textarea>
+                                <div class="upload-help">Maximum 500 characters.</div>
                             </div>
                         </div>
 
-                        <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn btn-app-primary btn-lg">
-                                <i class="bi bi-cloud-arrow-up"></i> Upload Paper
+                        <div class="upload-progress" id="progressWrap" hidden>
+                            <div class="upload-progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                <div class="upload-progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="upload-progress-text" id="progressText" aria-live="polite">Preparing upload...</div>
+                        </div>
+
+                        <div class="upload-actions">
+                            <button type="submit" class="btn btn-app-primary btn-lg" id="submitBtn" disabled>
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading form...
                             </button>
-                            <a href="dashboard.html" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                            <a href="manage.html" class="btn btn-outline btn-lg" id="cancelBtn">Cancel</a>
                         </div>
                     </form>
                 </div>
+
+                <p class="upload-note">
+                    <i class="bi bi-info-circle"></i>
+                    Uploaded papers appear immediately in <strong>Manage Papers</strong> and the student portal.
+                </p>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- ================= FOOTER ================= -->
     <footer>
@@ -154,9 +397,9 @@
             </div>
             <div>
                 <h3>Quick Links</h3>
-                <a href="index.html">Home</a>
-                <a href="#courses">Courses</a>
-                <a href="#papers">Question Papers</a>
+                <a href="../index.html">Home</a>
+                <a href="upload.html">Upload Paper</a>
+                <a href="manage.html">Manage Papers</a>
             </div>
             <div>
                 <h3>Contact Info</h3>
@@ -169,178 +412,17 @@
         </div>
     </footer>
 
-    <!-- ================= JAVASCRIPT ================= -->
-    <script type="module">
-        import { auth } from '../firebase-config.js';
-        import { storage } from '../firebase-config.js';
-        import { db } from '../firebase-config.js';
-        import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
-        import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { getDocs, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
-        function openLoginModal() { document.getElementById('loginRequiredModal').classList.add('show'); }
-        function closeLoginModal() { document.getElementById('loginRequiredModal').classList.remove('show'); }
-
-        function openPrincipalBioModal() { document.getElementById('principalBioModal').classList.add('show'); }
-        function closePrincipalBioModal() { document.getElementById('principalBioModal').classList.remove('show'); }
-
-        function openCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.add('show'); }
-        function closeCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.remove('show'); }
-
-        function openChairmanBioModal() { document.getElementById('chairmanBioModal').classList.add('show'); }
-        function closeChairmanBioModal() { document.getElementById('chairmanBioModal').classList.remove('show'); }
-
-        // Close modals on clicking outside
-        window.addEventListener('click', function (event) {
-            const modals = document.querySelectorAll('.login-modal, .bio-modal');
-            modals.forEach(function (modal) {
-                if (event.target === modal) {
-                    modal.classList.remove('show');
-                }
-            });
-        });
-
-        // Auth guard & load dropdowns
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) return window.location.href = '../login.html';
-
-            // Verify staff role
-            const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-            const snap = await getDoc(doc(db, 'users', user.uid));
-            if (!snap.exists() || snap.data().role !== 'staff') {
-                alert('Staff access required.');
-                return window.location.href = '../login.html';
-            }
-
-            // Load dropdown data from Firestore
-            await loadCourses();
-            await loadYears();
-
-            // Chain dropdowns
-            document.getElementById('course_id').addEventListener('change', (e) => {
-                loadSubcourses(e.target.value);
-                document.getElementById('subject_id').innerHTML = '<option value="">-- Select subject --</option>';
-                document.getElementById('subject_id').disabled = true;
-            });
-
-            document.getElementById('subcourse_id').addEventListener('change', (e) => {
-                loadSubjects(e.target.value);
-            });
-        });
-
-        async function loadCourses() {
-            const snap = await getDocs(query(collection(db, 'courses'), orderBy('code')));
-            const sel = document.getElementById('course_id');
-            sel.innerHTML = '<option value="">-- Select course --</option>';
-            snap.docs.forEach(d => {
-                const c = d.data();
-                sel.innerHTML += `<option value="${d.id}">${c.code} - ${c.name}</option>`;
-            });
-        }
-
-        async function loadSubcourses(courseId) {
-            const sel = document.getElementById('subcourse_id');
-            sel.innerHTML = '<option value="">-- Select sub-course --</option>';
-            sel.disabled = true;
-            if (!courseId) return;
-
-            const snap = await getDocs(query(collection(db, 'subcourses'), where('courseId', '==', courseId), orderBy('name')));
-            snap.docs.forEach(d => {
-                const s = d.data();
-                sel.innerHTML += `<option value="${d.id}">${s.name}</option>`;
-            });
-            sel.disabled = false;
-        }
-
-        async function loadSubjects(subcourseId) {
-            const sel = document.getElementById('subject_id');
-            sel.innerHTML = '<option value="">-- Select subject --</option>';
-            sel.disabled = true;
-            if (!subcourseId) return;
-
-            const snap = await getDocs(query(collection(db, 'subjects'), where('subcourseId', '==', subcourseId), orderBy('code')));
-            snap.docs.forEach(d => {
-                const s = d.data();
-                sel.innerHTML += `<option value="${d.id}">${s.code} - ${s.name}</option>`;
-            });
-            sel.disabled = false;
-        }
-
-        async function loadYears() {
-            const snap = await getDocs(query(collection(db, 'academic_years'), orderBy('name', 'desc')));
-            const sel = document.getElementById('year_id');
-            sel.innerHTML = '<option value="">-- Year --</option>';
-            snap.docs.forEach(d => {
-                const y = d.data();
-                sel.innerHTML += `<option value="${d.id}">${y.name}</option>`;
-            });
-        }
-
-        // Upload form handler
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Uploading...';
-
-            const form = e.target;
-            const file = form.paper_file.files[0];
-            if (!file) return alert('Please select a PDF file.');
-            if (file.type !== 'application/pdf') return alert('Only PDF files allowed.');
-            if (file.size > 10 * 1024 * 1024) return alert('File too large (max 10 MB).');
-
-            try {
-                // 1. Upload PDF to Firebase Storage
-                const user = auth.currentUser;
-                const fileName = `${user.uid}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-                const fileRef = ref(storage, `papers/${fileName}`);
-                await uploadBytes(fileRef, file);
-                const downloadURL = await getDownloadURL(fileRef);
-
-                // 2. Save metadata to Firestore
-                await addDoc(collection(db, 'papers'), {
-                    title: form.title.value.trim() || `Paper - ${new Date().toLocaleDateString()}`,
-                    description: form.description.value.trim(),
-                    courseId: form.course_id.value,
-                    subcourseId: form.subcourse_id.value,
-                    subjectId: form.subject_id.value,
-                    yearId: form.year_id.value,
-                    semester: parseInt(form.semester.value),
-                    fileUrl: downloadURL,
-                    fileName: file.name,
-                    fileSize: file.size,
-                    uploadedBy: user.uid,
-                    createdAt: serverTimestamp()
-                });
-
-                alert('Question paper uploaded successfully!');
-                window.location.href = 'manage.html';
-            } catch (err) {
-                console.error(err);
-                alert('Upload failed: ' + err.message);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Upload Paper';
-            }
-        });
-    </script>
-
     <!-- ================= PRINCIPAL BIOGRAPHY MODAL ================= -->
     <div class="bio-modal" id="principalBioModal">
         <div class="bio-modal-box">
-            <button class="modal-close" type="button" onclick="closePrincipalBioModal()">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+            <button class="modal-close" type="button" onclick="closePrincipalBioModal()"><i class="fa-solid fa-xmark"></i></button>
             <img src="/assets/img/principal.jfif" alt="Principal" class="bio-modal-img">
             <h2>Principal</h2>
             <div class="bio-subtitle">Principal</div>
             <div class="bio-text">
-                <p>Sri S. Madhusudhana Rao is the Principal of Mother Theresa Degree College (MTDC), Palamaner. He is an experienced educationist with around 25 years of experience in the field of education.
-
-He holds an M.Sc. in Mathematics and an M.Phil. from M.K. University, along with a B.Ed. His academic background and extensive experience reflect his commitment to education and continuous learning.
-
-As Principal, he provides academic and administrative leadership to the institution and works towards creating a supportive environment for students and faculty.</p>
+                <p>Sri S. Madhusudhana Rao is the Principal of Mother Theresa Degree College (MTDC), Palamaner. He is an experienced educationist with around 25 years of experience in the field of education.</p>
+                <p>He holds an M.Sc. in Mathematics and an M.Phil. from M.K. University, along with a B.Ed. His academic background and extensive experience reflect his commitment to education and continuous learning.</p>
+                <p>As Principal, he provides academic and administrative leadership to the institution and works towards creating a supportive environment for students and faculty.</p>
             </div>
         </div>
     </div>
@@ -348,9 +430,7 @@ As Principal, he provides academic and administrative leadership to the institut
     <!-- ================= CORRESPONDENT BIOGRAPHY MODAL ================= -->
     <div class="bio-modal" id="correspondentBioModal">
         <div class="bio-modal-box">
-            <button class="modal-close" type="button" onclick="closeCorrespondentBioModal()">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+            <button class="modal-close" type="button" onclick="closeCorrespondentBioModal()"><i class="fa-solid fa-xmark"></i></button>
             <img src="/assets/img/correspondent.png" alt="MR. Ravindra Babu" class="bio-modal-img">
             <h2>MR. Ravindra Babu</h2>
             <div class="bio-subtitle">Correspondent</div>
@@ -363,9 +443,7 @@ As Principal, he provides academic and administrative leadership to the institut
     <!-- ================= CHAIRMAN BIOGRAPHY MODAL ================= -->
     <div class="bio-modal" id="chairmanBioModal">
         <div class="bio-modal-box">
-            <button class="modal-close" type="button" onclick="closeChairmanBioModal()">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+            <button class="modal-close" type="button" onclick="closeChairmanBioModal()"><i class="fa-solid fa-xmark"></i></button>
             <img src="/assets/img/chairman.jpg" alt="MR. Sunil" class="bio-modal-img">
             <h2>MR. Sunil</h2>
             <div class="bio-subtitle">Chairman</div>
@@ -375,22 +453,697 @@ As Principal, he provides academic and administrative leadership to the institut
         </div>
     </div>
 
-    <!-- ================= LOGIN REQUIRED MODAL ================= -->
-    <div class="login-modal" id="loginRequiredModal">
-        <div class="login-modal-box">
-            <button class="modal-close" type="button" onclick="closeLoginModal()">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <div class="login-modal-icon">
-                <i class="fa-solid fa-lock"></i>
-            </div>
-            <h2>Login Required</h2>
-            <p>Please login to <strong>view or download</strong> question papers.</p>
-            <div class="modal-login-buttons">
-                <a href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
-            </div>
-        </div>
-    </div>
+    <!-- ================= JAVASCRIPT ================= -->
+    <script type="module">
+        import { auth, db, storage } from '../firebase-config.js';
+        import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import {
+            addDoc,
+            collection,
+            doc,
+            getDoc,
+            getDocs,
+            serverTimestamp
+        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        import {
+            deleteObject,
+            getDownloadURL,
+            ref,
+            uploadBytesResumable
+        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+
+        const $ = (id) => document.getElementById(id);
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+        let currentUser = null;
+        let bootStarted = false;
+        let uploading = false;
+        let formReady = false;
+
+        let allCourses = [];
+        let allSubcourses = [];
+        let allSubjects = [];
+        let allYears = [];
+
+        /* ------------------------------------------------------------------
+           Small helpers
+        ------------------------------------------------------------------ */
+        function esc(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[ch]));
+        }
+
+        function formatBytes(bytes) {
+            const size = Number(bytes);
+            if (!Number.isFinite(size) || size <= 0) return '0 B';
+            if (size < 1024) return size + ' B';
+            if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB';
+            return (size / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-check'} me-2"></i>${esc(message)}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3600);
+        }
+
+        /* ------------------------------------------------------------------
+           Bio modals (inline onclick handlers need window functions)
+        ------------------------------------------------------------------ */
+        window.openPrincipalBioModal = () => $('principalBioModal').classList.add('show');
+        window.closePrincipalBioModal = () => $('principalBioModal').classList.remove('show');
+
+        window.openCorrespondentBioModal = () => $('correspondentBioModal').classList.add('show');
+        window.closeCorrespondentBioModal = () => $('correspondentBioModal').classList.remove('show');
+
+        window.openChairmanBioModal = () => $('chairmanBioModal').classList.add('show');
+        window.closeChairmanBioModal = () => $('chairmanBioModal').classList.remove('show');
+
+        window.addEventListener('click', (event) => {
+            document.querySelectorAll('.bio-modal').forEach((modal) => {
+                if (event.target === modal) modal.classList.remove('show');
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+            document.querySelectorAll('.bio-modal.show').forEach((modal) => {
+                modal.classList.remove('show');
+            });
+        });
+
+        /* ------------------------------------------------------------------
+           Form helpers
+        ------------------------------------------------------------------ */
+        function showFormError(message) {
+            const box = $('formError');
+            box.textContent = message;
+            box.hidden = false;
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            box.focus({ preventScroll: true });
+        }
+
+        function hideFormError() {
+            const box = $('formError');
+            box.textContent = '';
+            box.hidden = true;
+        }
+
+        function markInvalid(element, invalid = true) {
+            if (!element) return;
+            element.classList.toggle('is-invalid', Boolean(invalid));
+        }
+
+        function clearFieldErrors() {
+            $('uploadForm').querySelectorAll('.is-invalid').forEach((element) => {
+                element.classList.remove('is-invalid');
+            });
+        }
+
+        function setProgress(percent, text) {
+            const value = Math.max(0, Math.min(100, Number(percent) || 0));
+            $('progressFill').style.width = value + '%';
+            $('progressTrack').setAttribute('aria-valuenow', String(value));
+            $('progressText').textContent = text || '';
+        }
+
+        function setFormBusy(busy) {
+            $('uploadForm').setAttribute('aria-busy', String(Boolean(busy)));
+
+            $('course_id').disabled = busy;
+            $('semester').disabled = busy;
+            $('year_id').disabled = busy;
+            $('paper_file').disabled = busy;
+            $('title').disabled = busy;
+            $('description').disabled = busy;
+
+            if (busy) {
+                $('subcourse_id').disabled = true;
+                $('subject_id').disabled = true;
+            } else {
+                const hasSubcourses = Array.from($('subcourse_id').options).some((option) => option.value);
+                const hasSubjects = Array.from($('subject_id').options).some((option) => option.value);
+
+                $('subcourse_id').disabled = !$('course_id').value || !hasSubcourses;
+                $('subject_id').disabled = !$('subcourse_id').value || !hasSubjects;
+            }
+
+            const cancelBtn = $('cancelBtn');
+            if (cancelBtn) {
+                cancelBtn.classList.toggle('disabled', Boolean(busy));
+                cancelBtn.setAttribute('aria-disabled', String(Boolean(busy)));
+            }
+        }
+
+        function isPdfFile(file) {
+            if (!file) return false;
+            return file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+        }
+
+        function friendlyUploadError(err) {
+            const code = err && err.code ? err.code : '';
+
+            switch (code) {
+                case 'storage/unauthorized':
+                    return 'Storage permission denied. Please check your Firebase Storage rules.';
+                case 'storage/canceled':
+                    return 'The upload was cancelled.';
+                case 'storage/retry-limit-exceeded':
+                    return 'The upload timed out. Please try again.';
+                case 'storage/quota-exceeded':
+                    return 'Firebase Storage quota reached. Please try again later.';
+                case 'permission-denied':
+                    return 'You do not have permission to save this paper.';
+                case 'unauthenticated':
+                    return 'Your login session expired. Please log in again.';
+                case 'resource-exhausted':
+                    return 'Firebase quota reached. Please try again later.';
+                default:
+                    return err && err.message ? err.message : 'Upload failed. Please try again.';
+            }
+        }
+
+        /* ------------------------------------------------------------------
+           Dropdown data
+        ------------------------------------------------------------------ */
+        async function loadLookups() {
+            const [coursesSnap, subcoursesSnap, subjectsSnap, yearsSnap] = await Promise.all([
+                getDocs(collection(db, 'courses')),
+                getDocs(collection(db, 'subcourses')),
+                getDocs(collection(db, 'subjects')),
+                getDocs(collection(db, 'academic_years'))
+            ]);
+
+            allCourses = coursesSnap.docs
+                .map((d) => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => String(a.code || '').localeCompare(String(b.code || '')) || String(a.name || '').localeCompare(String(b.name || '')));
+
+            allSubcourses = subcoursesSnap.docs
+                .map((d) => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+
+            allSubjects = subjectsSnap.docs
+                .map((d) => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => String(a.code || '').localeCompare(String(b.code || '')) || String(a.name || '').localeCompare(String(b.name || '')));
+
+            allYears = yearsSnap.docs
+                .map((d) => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => String(b.name || '').localeCompare(String(a.name || '')));
+        }
+
+        function populateCourseSelect() {
+            const select = $('course_id');
+            select.innerHTML = '<option value="">-- Select course --</option>';
+            allCourses.forEach((course) => {
+                const label = [course.code, course.name].filter(Boolean).join(' - ') || course.id;
+                select.insertAdjacentHTML('beforeend', `<option value="${esc(course.id)}">${esc(label)}</option>`);
+            });
+        }
+
+        function populateYearSelect() {
+            const select = $('year_id');
+            select.innerHTML = '<option value="">-- Select year --</option>';
+            allYears.forEach((year) => {
+                select.insertAdjacentHTML('beforeend', `<option value="${esc(year.id)}">${esc(year.name || year.id)}</option>`);
+            });
+        }
+
+        function resetSubcourseSelect() {
+            const select = $('subcourse_id');
+            select.innerHTML = '<option value="">-- Select sub-course --</option>';
+            select.disabled = true;
+        }
+
+        function resetSubjectSelect() {
+            const select = $('subject_id');
+            select.innerHTML = '<option value="">-- Select subject --</option>';
+            select.disabled = true;
+        }
+
+        function populateSubcourses(courseId) {
+            const select = $('subcourse_id');
+            select.innerHTML = '<option value="">-- Select sub-course --</option>';
+
+            if (!courseId) {
+                select.disabled = true;
+                return;
+            }
+
+            const matches = allSubcourses.filter((subcourse) => subcourse.courseId === courseId);
+
+            if (matches.length === 0) {
+                select.insertAdjacentHTML('beforeend', '<option value="" disabled>No sub-courses available for this course.</option>');
+                select.disabled = true;
+                return;
+            }
+
+            matches.forEach((subcourse) => {
+                select.insertAdjacentHTML('beforeend', `<option value="${esc(subcourse.id)}">${esc(subcourse.name || subcourse.id)}</option>`);
+            });
+
+            select.disabled = false;
+        }
+
+        function populateSubjects(subcourseId) {
+            const select = $('subject_id');
+            select.innerHTML = '<option value="">-- Select subject --</option>';
+
+            if (!subcourseId) {
+                select.disabled = true;
+                return;
+            }
+
+            const semester = $('semester').value;
+
+            const matches = allSubjects
+                .filter((subject) => subject.subcourseId === subcourseId)
+                .filter((subject) => {
+                    if (!semester) return true;
+                    if (subject.semester == null || subject.semester === '') return true;
+                    return String(subject.semester) === semester;
+                });
+
+            if (matches.length === 0) {
+                select.insertAdjacentHTML('beforeend', '<option value="" disabled>No subjects available for this selection.</option>');
+                select.disabled = true;
+                return;
+            }
+
+            matches.forEach((subject) => {
+                const label = [subject.code, subject.name].filter(Boolean).join(' - ') || subject.id;
+                select.insertAdjacentHTML('beforeend', `<option value="${esc(subject.id)}">${esc(label)}</option>`);
+            });
+
+            select.disabled = false;
+        }
+
+        /* ------------------------------------------------------------------
+           Title auto-generation hint
+        ------------------------------------------------------------------ */
+        function buildAutoTitle() {
+            const subject = allSubjects.find((item) => item.id === $('subject_id').value);
+            const year = allYears.find((item) => item.id === $('year_id').value);
+            const semester = $('semester').value;
+
+            const parts = [];
+            if (subject) parts.push(subject.name || subject.code);
+            if (semester) parts.push(`Semester ${semester}`);
+            if (year) parts.push(year.name || year.id);
+
+            return parts.filter(Boolean).join(' - ');
+        }
+
+        function refreshTitleHint() {
+            const auto = buildAutoTitle();
+            $('titleHelp').textContent = auto
+                ? `Leave blank to use: "${auto}".`
+                : 'Leave blank to auto-generate from the selected subject, semester and year.';
+        }
+
+        /* ------------------------------------------------------------------
+           Validation
+        ------------------------------------------------------------------ */
+        function validateForm() {
+            clearFieldErrors();
+            hideFormError();
+
+            const requiredFields = [
+                { id: 'course_id', label: 'Course' },
+                { id: 'subcourse_id', label: 'Sub-Course' },
+                { id: 'semester', label: 'Semester' },
+                { id: 'subject_id', label: 'Subject' },
+                { id: 'year_id', label: 'Academic Year' }
+            ];
+
+            const missing = [];
+            let firstInvalid = null;
+
+            requiredFields.forEach(({ id, label }) => {
+                const element = $(id);
+                if (!element.value) {
+                    markInvalid(element);
+                    missing.push(label);
+                    if (!firstInvalid) firstInvalid = element;
+                }
+            });
+
+            const fileInput = $('paper_file');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                markInvalid(fileInput);
+                missing.push('Question Paper PDF');
+                if (!firstInvalid) firstInvalid = fileInput;
+            }
+
+            if (missing.length) {
+                showFormError(`Please complete the following: ${missing.join(', ')}.`);
+                if (firstInvalid) firstInvalid.focus();
+                return null;
+            }
+
+            if (!isPdfFile(file)) {
+                markInvalid(fileInput);
+                showFormError('Only PDF files are allowed. Please choose a .pdf file.');
+                fileInput.focus();
+                return null;
+            }
+
+            if (file.size === 0) {
+                markInvalid(fileInput);
+                showFormError('The selected PDF file is empty. Please choose a valid file.');
+                fileInput.focus();
+                return null;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                markInvalid(fileInput);
+                showFormError(`The selected file is ${formatBytes(file.size)}. The maximum allowed size is 10 MB.`);
+                fileInput.focus();
+                return null;
+            }
+
+            return { file };
+        }
+
+        /* ------------------------------------------------------------------
+           Submit / upload
+        ------------------------------------------------------------------ */
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            if (uploading) return;
+
+            if (!formReady) {
+                showToast('The form is still loading. Please wait a moment and try again.', 'error');
+                return;
+            }
+
+            if (!currentUser) {
+                showToast('Your session is still loading. Please wait a moment and try again.', 'error');
+                return;
+            }
+
+            const validation = validateForm();
+            if (!validation) return;
+
+            const { file } = validation;
+            const submitBtn = $('submitBtn');
+            const originalButtonHtml = submitBtn.innerHTML;
+
+            uploading = true;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            setFormBusy(true);
+            setProgress(0, 'Starting upload...');
+            $('progressWrap').hidden = false;
+
+            let uploadedRef = null;
+            let savedToFirestore = false;
+
+            try {
+                const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                const safeName = cleanName.length > 100 ? cleanName.slice(cleanName.length - 100) : cleanName;
+                const storagePath = `papers/${currentUser.uid}/${Date.now()}_${safeName}`;
+                uploadedRef = ref(storage, storagePath);
+
+                await new Promise((resolve, reject) => {
+                    const task = uploadBytesResumable(uploadedRef, file, {
+                        contentType: 'application/pdf',
+                        cacheControl: 'public,max-age=31536000'
+                    });
+
+                    task.on(
+                        'state_changed',
+                        (snapshot) => {
+                            const percent = snapshot.totalBytes
+                                ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                                : 0;
+                            setProgress(percent, `Uploading PDF... ${percent}%`);
+                        },
+                        reject,
+                        resolve
+                    );
+                });
+
+                setProgress(100, 'Saving paper details...');
+
+                const fileUrl = await getDownloadURL(uploadedRef);
+                const semester = Number($('semester').value);
+                const title = $('title').value.trim() || buildAutoTitle() || `Question Paper - ${new Date().getFullYear()}`;
+
+                await addDoc(collection(db, 'papers'), {
+                    title,
+                    description: $('description').value.trim(),
+                    courseId: $('course_id').value,
+                    subcourseId: $('subcourse_id').value,
+                    subjectId: $('subject_id').value,
+                    yearId: $('year_id').value,
+                    semester,
+                    fileUrl,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    uploadedBy: currentUser.uid,
+                    downloads: 0,
+                    views: 0,
+                    status: 'active',
+                    createdAt: serverTimestamp()
+                });
+
+                savedToFirestore = true;
+                uploading = false;
+
+                setProgress(100, 'Upload complete. Redirecting to Manage Papers...');
+                showToast('Question paper uploaded successfully.');
+                submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Uploaded';
+
+                setTimeout(() => {
+                    window.location.replace('manage.html');
+                }, 900);
+            } catch (err) {
+                console.error('Upload failed:', err);
+
+                // If Storage succeeded but Firestore failed, remove the orphaned file.
+                // Never delete the PDF once the Firestore document has been saved.
+                if (uploadedRef && !savedToFirestore) {
+                    try {
+                        await deleteObject(uploadedRef);
+                    } catch (cleanupErr) {
+                        console.warn('Could not clean up the uploaded file:', cleanupErr);
+                    }
+                }
+
+                const message = friendlyUploadError(err);
+                showFormError(message);
+                showToast(message, 'error');
+
+                $('progressWrap').hidden = true;
+                setProgress(0, '');
+
+                uploading = false;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalButtonHtml;
+                setFormBusy(false);
+            }
+        }
+
+        /* ------------------------------------------------------------------
+           Events
+        ------------------------------------------------------------------ */
+        function bindEvents() {
+            $('course_id').addEventListener('change', () => {
+                markInvalid($('course_id'), false);
+                hideFormError();
+
+                const courseId = $('course_id').value;
+                resetSubjectSelect();
+
+                if (!courseId) {
+                    resetSubcourseSelect();
+                } else {
+                    populateSubcourses(courseId);
+                }
+
+                refreshTitleHint();
+            });
+
+            $('subcourse_id').addEventListener('change', () => {
+                markInvalid($('subcourse_id'), false);
+                hideFormError();
+
+                const subcourseId = $('subcourse_id').value;
+                if (!subcourseId) {
+                    resetSubjectSelect();
+                } else {
+                    populateSubjects(subcourseId);
+                }
+
+                refreshTitleHint();
+            });
+
+            $('semester').addEventListener('change', () => {
+                markInvalid($('semester'), false);
+                hideFormError();
+
+                const subcourseId = $('subcourse_id').value;
+                if (subcourseId) populateSubjects(subcourseId);
+
+                refreshTitleHint();
+            });
+
+            $('subject_id').addEventListener('change', () => {
+                markInvalid($('subject_id'), false);
+                hideFormError();
+                refreshTitleHint();
+            });
+
+            $('year_id').addEventListener('change', () => {
+                markInvalid($('year_id'), false);
+                hideFormError();
+                refreshTitleHint();
+            });
+
+            $('paper_file').addEventListener('change', () => {
+                markInvalid($('paper_file'), false);
+                hideFormError();
+
+                const file = $('paper_file').files[0];
+                if (!file) {
+                    $('fileHelp').textContent = 'Only PDF files, maximum 10 MB.';
+                    return;
+                }
+
+                $('fileHelp').textContent = `${file.name} (${formatBytes(file.size)})`;
+
+                if (!isPdfFile(file)) {
+                    markInvalid($('paper_file'));
+                    showFormError('Only PDF files are allowed. Please choose a .pdf file.');
+                } else if (file.size > MAX_FILE_SIZE) {
+                    markInvalid($('paper_file'));
+                    showFormError(`This file is ${formatBytes(file.size)}. The maximum allowed size is 10 MB.`);
+                }
+            });
+
+            $('uploadForm').addEventListener('submit', handleSubmit);
+
+            $('cancelBtn').addEventListener('click', (event) => {
+                if (uploading) event.preventDefault();
+            });
+
+            window.addEventListener('beforeunload', (event) => {
+                if (!uploading) return;
+                event.preventDefault();
+                event.returnValue = '';
+            });
+
+            // This project uses its own dropdown styles (no Bootstrap JS), so toggle it manually.
+            const userDropdown = $('userDropdown');
+            const userMenu = userDropdown ? userDropdown.parentElement.querySelector('.dropdown-menu') : null;
+            if (userDropdown && userMenu) {
+                userDropdown.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const isOpen = userMenu.classList.toggle('show');
+                    userDropdown.setAttribute('aria-expanded', String(isOpen));
+                });
+
+                document.addEventListener('click', (event) => {
+                    if (!event.target.closest('.dropdown')) {
+                        userMenu.classList.remove('show');
+                        userDropdown.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+        }
+
+        /* ------------------------------------------------------------------
+           Auth + boot
+        ------------------------------------------------------------------ */
+        function renderUser(profile, user) {
+            $('headerUserName').textContent = profile.name || user.email || 'Staff';
+            $('headerUserEmail').textContent = profile.email || user.email || '';
+        }
+
+        async function init() {
+            bindEvents();
+
+            try {
+                await loadLookups();
+                populateCourseSelect();
+                populateYearSelect();
+                resetSubcourseSelect();
+                resetSubjectSelect();
+                refreshTitleHint();
+
+                const submitBtn = $('submitBtn');
+                const missingSetupData = allCourses.length === 0 || allYears.length === 0;
+
+                if (missingSetupData) {
+                    formReady = false;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Setup Required';
+                    showFormError('Course or academic year data is missing. Please contact the administrator to finish setting up the portal.');
+                } else {
+                    formReady = true;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> Upload Paper';
+                }
+            } catch (err) {
+                console.error('Could not load form data:', err);
+                formReady = false;
+                const message = err && err.message ? err.message : 'Unknown error';
+                showFormError('Could not load courses and subjects: ' + message);
+                showToast('Could not load form data.', 'error');
+                $('submitBtn').disabled = true;
+                $('submitBtn').innerHTML = '<i class="bi bi-exclamation-triangle"></i> Loading Failed';
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.replace('../login.html');
+                return;
+            }
+
+            if (bootStarted) return;
+            bootStarted = true;
+            currentUser = user;
+
+            try {
+                const snap = await getDoc(doc(db, 'users', user.uid));
+                const role = snap.exists() ? snap.data().role : null;
+
+                if (role !== 'staff') {
+                    if (role === 'student') {
+                        window.location.replace('../student/dashboard.html');
+                    } else {
+                        await signOut(auth).catch(() => {});
+                        window.location.replace('../login.html');
+                    }
+                    return;
+                }
+
+                renderUser(snap.data(), user);
+                await init();
+            } catch (err) {
+                console.error('Could not initialise the upload page:', err);
+                formReady = false;
+                showToast('Could not verify your account: ' + (err && err.message ? err.message : 'Unknown error'), 'error');
+                showFormError('Could not verify your account. Please refresh the page and try again.');
+                $('submitBtn').disabled = true;
+                $('submitBtn').innerHTML = '<i class="bi bi-exclamation-triangle"></i> Unable to Load';
+            }
+        });
+    </script>
 </body>
 </html>
-
