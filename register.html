@@ -156,15 +156,11 @@
     </footer>
 
     <!-- ================= JAVASCRIPT ================= -->
-    <script>
-        // Check if sessionStorage is available (required for registration flow)
-        try {
-            sessionStorage.setItem('test', 'test');
-            sessionStorage.removeItem('test');
-        } catch (e) {
-            document.body.innerHTML = '<div class="container text-center py-5"><div class="alert alert-danger"><h4>Server Required</h4><p>This application requires a web server to function properly.</p><p>Please run it through XAMPP, WAMP, or PHP built-in server (<code>php -S localhost:8000</code>), not by opening files directly.</p></div></div>';
-            throw new Error('sessionStorage not available');
-        }
+    <script type="module">
+        import { auth } from './firebase-config.js';
+        import { createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { db } from './firebase-config.js';
+        import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
         function openLoginModal() { document.getElementById('loginRequiredModal').classList.add('show'); }
         function closeLoginModal() { document.getElementById('loginRequiredModal').classList.remove('show'); }
@@ -188,8 +184,8 @@
             });
         });
 
-        // Registration form handler - Direct register without OTP
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
+        // Registration form handler - Firebase Auth + Firestore
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const btn = this.querySelector('button[type="submit"]');
@@ -215,41 +211,39 @@
                 return;
             }
 
-            // Direct registration - save user and redirect to login
-            setTimeout(() => {
-                const userData = {
+            try {
+                // 1. Create Firebase Auth user
+                const cred = await createUserWithEmailAndPassword(auth, formData.get('email'), password);
+
+                // 2. Save profile to Firestore
+                await setDoc(doc(db, 'users', cred.user.uid), {
                     name: formData.get('name'),
                     email: formData.get('email'),
                     mobile: formData.get('mobile'),
-                    password: password, // In real app, this would be hashed
                     role: formData.get('role'),
-                    email_verified: true,
-                    mobile_verified: true,
-                    created_at: new Date().toISOString()
-                };
+                    status: 'active',
+                    emailVerified: false,
+                    mobileVerified: false,
+                    createdAt: new Date().toISOString()
+                });
 
-                // Save user to localStorage (simulating database)
-                const users = JSON.parse(localStorage.getItem('mt_users') || '[]');
-                
-                // Check if email already exists
-                if (users.find(u => u.email === userData.email)) {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    alert('Email already registered. Please login.');
-                    return;
-                }
-                
-                users.push(userData);
-                localStorage.setItem('mt_users', JSON.stringify(users));
+                // 3. Send email verification
+                await cred.user.sendEmailVerification();
 
-                // Auto-login after registration
-                sessionStorage.setItem('mt_user', JSON.stringify(userData));
-                sessionStorage.setItem('mt_logged_in', 'true');
-
-                // Redirect based on role
-                const targetUrl = userData.role === 'staff' ? 'staff/manage.html' : 'student/dashboard.html';
-                window.location.href = targetUrl;
-            }, 800);
+                alert('Registration successful! Please check your email to verify, then login.');
+                window.location.href = 'login.html';
+            } catch (err) {
+                console.error(err);
+                let msg = 'Registration failed. ';
+                if (err.code === 'auth/email-already-in-use') msg = 'Email already registered. Please login.';
+                else if (err.code === 'auth/weak-password') msg = 'Password too weak (minimum 8 characters).';
+                else if (err.code === 'auth/invalid-email') msg = 'Invalid email format.';
+                else msg += err.message;
+                alert(msg);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         });
 
         // Password match validation

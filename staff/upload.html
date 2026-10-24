@@ -68,24 +68,19 @@
                     </div>
                 </div>
                 <div class="card-body p-4">
-                    <form method="post" action="upload.html" enctype="multipart/form-data" novalidate>
-                        <input type="hidden" name="csrf_token" value="token">
+                    <form id="uploadForm" enctype="multipart/form-data" novalidate>
 
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label fw-semibold" for="course_id">Course</label>
                                 <select class="form-select" name="course_id" id="course_id" required>
                                     <option value="">-- Select course --</option>
-                                    <option value="1">B.Com</option>
-                                    <option value="2">B.Sc</option>
-                                    <option value="3">BCA</option>
-                                    <option value="4">BBA</option>
                                 </select>
                             </div>
 
                             <div class="col-md-3">
                                 <label class="form-label fw-semibold" for="subcourse_id">Sub-Course (Specialisation)</label>
-                                <select class="form-select" name="subcourse_id" id="subcourse_id" required>
+                                <select class="form-select" name="subcourse_id" id="subcourse_id" required disabled>
                                     <option value="">-- Select sub-course --</option>
                                 </select>
                             </div>
@@ -105,7 +100,7 @@
 
                             <div class="col-md-3">
                                 <label class="form-label fw-semibold" for="subject_id">Subject</label>
-                                <select class="form-select" name="subject_id" id="subject_id" required>
+                                <select class="form-select" name="subject_id" id="subject_id" required disabled>
                                     <option value="">-- Select subject --</option>
                                 </select>
                             </div>
@@ -128,6 +123,13 @@
                                 <input type="file" class="form-control" id="paper_file"
                                        name="paper_file" accept=".pdf,application/pdf" required>
                                 <div class="form-text">Only PDF files up to 10 MB are allowed.</div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold" for="year_id">Academic Year</label>
+                                <select class="form-select" name="year_id" id="year_id" required>
+                                    <option value="">-- Year --</option>
+                                </select>
                             </div>
                         </div>
 
@@ -168,7 +170,15 @@
     </footer>
 
     <!-- ================= JAVASCRIPT ================= -->
-    <script>
+    <script type="module">
+        import { auth } from '../firebase-config.js';
+        import { storage } from '../firebase-config.js';
+        import { db } from '../firebase-config.js';
+        import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+        import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getDocs, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
         function openLoginModal() { document.getElementById('loginRequiredModal').classList.add('show'); }
         function closeLoginModal() { document.getElementById('loginRequiredModal').classList.remove('show'); }
 
@@ -189,6 +199,130 @@
                     modal.classList.remove('show');
                 }
             });
+        });
+
+        // Auth guard & load dropdowns
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return window.location.href = '../login.html';
+
+            // Verify staff role
+            const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+            const snap = await getDoc(doc(db, 'users', user.uid));
+            if (!snap.exists() || snap.data().role !== 'staff') {
+                alert('Staff access required.');
+                return window.location.href = '../login.html';
+            }
+
+            // Load dropdown data from Firestore
+            await loadCourses();
+            await loadYears();
+
+            // Chain dropdowns
+            document.getElementById('course_id').addEventListener('change', (e) => {
+                loadSubcourses(e.target.value);
+                document.getElementById('subject_id').innerHTML = '<option value="">-- Select subject --</option>';
+                document.getElementById('subject_id').disabled = true;
+            });
+
+            document.getElementById('subcourse_id').addEventListener('change', (e) => {
+                loadSubjects(e.target.value);
+            });
+        });
+
+        async function loadCourses() {
+            const snap = await getDocs(query(collection(db, 'courses'), orderBy('code')));
+            const sel = document.getElementById('course_id');
+            sel.innerHTML = '<option value="">-- Select course --</option>';
+            snap.docs.forEach(d => {
+                const c = d.data();
+                sel.innerHTML += `<option value="${d.id}">${c.code} - ${c.name}</option>`;
+            });
+        }
+
+        async function loadSubcourses(courseId) {
+            const sel = document.getElementById('subcourse_id');
+            sel.innerHTML = '<option value="">-- Select sub-course --</option>';
+            sel.disabled = true;
+            if (!courseId) return;
+
+            const snap = await getDocs(query(collection(db, 'subcourses'), where('courseId', '==', courseId), orderBy('name')));
+            snap.docs.forEach(d => {
+                const s = d.data();
+                sel.innerHTML += `<option value="${d.id}">${s.name}</option>`;
+            });
+            sel.disabled = false;
+        }
+
+        async function loadSubjects(subcourseId) {
+            const sel = document.getElementById('subject_id');
+            sel.innerHTML = '<option value="">-- Select subject --</option>';
+            sel.disabled = true;
+            if (!subcourseId) return;
+
+            const snap = await getDocs(query(collection(db, 'subjects'), where('subcourseId', '==', subcourseId), orderBy('code')));
+            snap.docs.forEach(d => {
+                const s = d.data();
+                sel.innerHTML += `<option value="${d.id}">${s.code} - ${s.name}</option>`;
+            });
+            sel.disabled = false;
+        }
+
+        async function loadYears() {
+            const snap = await getDocs(query(collection(db, 'academic_years'), orderBy('name', 'desc')));
+            const sel = document.getElementById('year_id');
+            sel.innerHTML = '<option value="">-- Year --</option>';
+            snap.docs.forEach(d => {
+                const y = d.data();
+                sel.innerHTML += `<option value="${d.id}">${y.name}</option>`;
+            });
+        }
+
+        // Upload form handler
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+
+            const form = e.target;
+            const file = form.paper_file.files[0];
+            if (!file) return alert('Please select a PDF file.');
+            if (file.type !== 'application/pdf') return alert('Only PDF files allowed.');
+            if (file.size > 10 * 1024 * 1024) return alert('File too large (max 10 MB).');
+
+            try {
+                // 1. Upload PDF to Firebase Storage
+                const user = auth.currentUser;
+                const fileName = `${user.uid}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+                const fileRef = ref(storage, `papers/${fileName}`);
+                await uploadBytes(fileRef, file);
+                const downloadURL = await getDownloadURL(fileRef);
+
+                // 2. Save metadata to Firestore
+                await addDoc(collection(db, 'papers'), {
+                    title: form.title.value.trim() || `Paper - ${new Date().toLocaleDateString()}`,
+                    description: form.description.value.trim(),
+                    courseId: form.course_id.value,
+                    subcourseId: form.subcourse_id.value,
+                    subjectId: form.subject_id.value,
+                    yearId: form.year_id.value,
+                    semester: parseInt(form.semester.value),
+                    fileUrl: downloadURL,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    uploadedBy: user.uid,
+                    createdAt: serverTimestamp()
+                });
+
+                alert('Question paper uploaded successfully!');
+                window.location.href = 'manage.html';
+            } catch (err) {
+                console.error(err);
+                alert('Upload failed: ' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Upload Paper';
+            }
         });
     </script>
 
@@ -257,179 +391,6 @@ As Principal, he provides academic and administrative leadership to the institut
             </div>
         </div>
     </div>
-
-<!-- ================= SUBCOURSE DATA & LOGIC ================= -->
-    <script>
-        // Subcourse data matching database
-        const subcourseData = {
-            '1': [ // B.Com
-                { id: 1, name: 'General' }
-            ],
-            '2': [ // B.Sc
-                { id: 2, name: 'Computer Science' },
-                { id: 3, name: 'Data Science' }
-            ],
-            '3': [ // BCA
-                { id: 4, name: 'General' }
-            ],
-            '4': [ // BBA
-                { id: 6, name: 'General' }
-            ]
-        };
-
-        // Populate subcourses when course changes
-        function initSubcourseLogic() {
-            console.log('Initializing subcourse logic');
-            
-            const courseSelect = document.getElementById('course_id');
-            const subcourseSelect = document.getElementById('subcourse_id');
-            const subjectSelect = document.getElementById('subject_id');
-            
-            console.log('Elements found:', { courseSelect, subcourseSelect, subjectSelect });
-            
-            if (!courseSelect) {
-                console.error('course_id element not found!');
-                return;
-            }
-            
-            // Populate subcourses based on current course value (in case of page refresh with value)
-            const initialCourseId = courseSelect.value;
-            if (initialCourseId && subcourseData[initialCourseId]) {
-                console.log('Populating subcourses for initial course:', initialCourseId);
-                subcourseData[initialCourseId].forEach(sc => {
-                    const opt = document.createElement('option');
-                    opt.value = sc.id;
-                    opt.textContent = sc.name;
-                    document.getElementById('subcourse_id').appendChild(opt);
-                });
-            }
-            
-            courseSelect.addEventListener('change', function() {
-                console.log('Course changed to:', this.value);
-                const courseId = this.value;
-                
-                const subcourseSelect = document.getElementById('subcourse_id');
-                const subjectSelect = document.getElementById('subject_id');
-                
-                // Reset subcourses
-                subcourseSelect.innerHTML = '<option value="">-- Select sub-course --</option>';
-                subcourseSelect.disabled = false;
-                
-                // Reset subjects
-                subjectSelect.innerHTML = '<option value="">-- Select subject --</option>';
-                subjectSelect.disabled = true;
-                
-                if (courseId && subcourseData[courseId]) {
-                    console.log('Populating subcourses for course:', courseId);
-                    subcourseData[courseId].forEach(sc => {
-                        const opt = document.createElement('option');
-                        opt.value = sc.id;
-                        opt.textContent = sc.name;
-                        subcourseSelect.appendChild(opt);
-                    });
-                } else if (!courseId) {
-                    subcourseSelect.disabled = true;
-                    subjectSelect.disabled = true;
-                }
-            });
-
-            // Populate subjects when subcourse or semester changes
-            document.getElementById('subcourse_id').addEventListener('change', function() {
-                console.log('Subcourse changed:', this.value);
-                loadSubjects(this.value, document.getElementById('semester') ? document.getElementById('semester').value : '');
-            });
-
-            document.getElementById('semester').addEventListener('change', function() {
-                console.log('Semester changed:', this.value);
-                loadSubjects(document.getElementById('subcourse_id') ? document.getElementById('subcourse_id').value : '', this.value);
-            });
-        }
-
-        // Initialize immediately if DOM is ready, otherwise wait for DOMContentLoaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initSubcourseLogic);
-        } else {
-            initSubcourseLogic();
-        }
-
-        // Subject data matching database
-        const subjectData = {
-                '1': [ // B.Com General
-                    { id: 1, code: 'CO101', name: 'Financial Accounting' },
-                    { id: 2, code: 'CO102', name: 'Business Laws' },
-                    { id: 3, code: 'CO201', name: 'Corporate Accounting' },
-                    { id: 4, code: 'CO301', name: 'Cost Accounting' },
-                    { id: 5, code: 'CO302', name: 'Taxation' }
-                ],
-                '2': [ // Computer Science (B.Sc)
-                    { id: 11, code: 'CS101', name: 'Programming in C' },
-                    { id: 12, code: 'CS201', name: 'Data Structures' },
-                    { id: 13, code: 'CS301', name: 'Database Management Systems' },
-                    { id: 14, code: 'CS401', name: 'Operating Systems' },
-                    { id: 15, code: 'CS402', name: 'Real Analysis' }
-                ],
-                '3': [ // Data Science (B.Sc) - new
-                    { id: 16, code: 'DS101', name: 'Introduction to Data Science' },
-                    { id: 17, code: 'DS201', name: 'Machine Learning Fundamentals' },
-                    { id: 18, code: 'DS301', name: 'Deep Learning' },
-                    { id: 19, code: 'DS401', name: 'Big Data Analytics' }
-                ],
-                '4': [ // BCA General
-                    { id: 10, code: 'CA101', name: 'Programming in C' },
-                    { id: 11, code: 'CA102', name: 'Digital Computer Fundamentals' },
-                    { id: 12, code: 'CA201', name: 'Data Structures' },
-                    { id: 13, code: 'CA202', name: 'Database Management Systems' },
-                    { id: 13, code: 'CA301', name: 'Operating Systems' },
-                    { id: 14, code: 'CA302', name: 'Computer Networks' },
-                    { id: 14, code: 'CA401', name: 'Web Technologies' },
-                    { id: 14, code: 'CA402', name: 'Software Engineering' }
-                ],
-                '6': [ // BBA General
-                    { id: 19, code: 'BB101', name: 'Principles of Management' },
-                    { id: 20, code: 'BB201', name: 'Organisational Behaviour' },
-                    { id: 21, code: 'BB301', name: 'Business Environment' }
-                ]
-            };
-
-            function loadSubjects(subcourseId, semester) {
-                console.log('loadSubjects called with:', subcourseId, semester);
-                const subjectSelectEl = document.getElementById('subject_id');
-                
-                if (!subcourseId) {
-                    subjectSelectEl.innerHTML = '<option value="">-- Select Subject --</option>';
-                    subjectSelectEl.disabled = true;
-                    return;
-                }
-                
-                subjectSelectEl.innerHTML = '<option value="">Loading...</option>';
-                subjectSelectEl.disabled = false;
-                
-                setTimeout(() => {
-                    const subjects = getSubjects(subcourseId, semester);
-                    console.log('Subjects:', subjects);
-                    subjectSelectEl.innerHTML = '<option value="">-- Select Subject --</option>';
-                    subjects.forEach(s => {
-                        const opt = document.createElement('option');
-                        opt.value = s.id;
-                        opt.textContent = s.name + (s.semester ? ` (Sem ${s.semester})` : '');
-                        subjectSelectEl.appendChild(opt);
-                    });
-                }, 300);
-            }
-
-            function getSubjects(subcourseId, semesterFilter = '') {
-                console.log('getSubjects called with:', subcourseId, semesterFilter);
-                const subjects = subjectData[subcourseId] || [];
-                console.log('Raw subjects:', subjects);
-                
-                const result = subjects.map(s => ({
-                    ...s,
-                    semester: parseInt(s.code.charAt(2)) || null
-                })).filter(s => !semesterFilter || s.semester == semesterFilter);
-                console.log('Filtered subjects:', result);
-                return result;
-            }
-    </script>
 </body>
 </html>
 

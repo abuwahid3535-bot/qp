@@ -8,25 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-    <!-- Auth check -->
-    <script>
-        (function() {
-            const user = JSON.parse(sessionStorage.getItem('mt_user') || 'null');
-            const loggedIn = sessionStorage.getItem('mt_logged_in') === 'true';
-            
-            console.log('Staff Manage Auth Check:', { user, loggedIn });
-            
-            if (!loggedIn || !user || user.role !== 'staff') {
-                console.log('Redirecting to login...');
-                sessionStorage.clear();
-                window.location.href = '../login.html?redirect=staff/manage.html';
-            }
-        })();
-    </script>
-
     <!-- ================= TOP BAR ================= -->
     <div class="top-bar">
         <div>
@@ -54,7 +39,7 @@
                     <span>MR. Sunil<br>(Chairman)</span>
                 </div>
             </div>
-            
+
             <!-- COLLEGE LOGO -->
             <div class="logo">
                 <img src="/assets/img/college.png" alt="Mother Theresa Logo" onerror="this.style.display='none'; this.parentNode.innerText='MT';">
@@ -149,10 +134,6 @@
                             <label for="course_id">Course</label>
                             <select class="form-select" name="course_id" id="course_id">
                                 <option value="">All Courses</option>
-                                <option value="1">B.Com</option>
-                                <option value="2">B.Sc</option>
-                                <option value="3">BCA</option>
-                                <option value="4">BBA</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -188,7 +169,7 @@
             </div>
 
             <!-- Papers Table -->
-            <div class="section-card">
+            <div class="section-card" id="papers">
                 <div class="section-header d-flex justify-content-between align-items-center">
                     <h2><i class="bi bi-journal-text"></i> Uploaded Papers <span class="badge badge-primary" id="paperCount">0</span></h2>
                     <div class="d-flex gap-2">
@@ -216,10 +197,9 @@
                             <tr>
                                 <td colspan="6">
                                     <div class="empty-state">
-                                        <i class="bi bi-cloud-upload"></i>
-                                        <h4>No papers uploaded yet</h4>
-                                        <p>Start by uploading your first question paper.</p>
-                                        <a href="upload.html" class="btn btn-accent mt-2"><i class="bi bi-cloud-arrow-up me-2"></i> Upload Paper</a>
+                                        <i class="fa-solid fa-spinner fa-spin" style="font-size: 32px; color: var(--app-primary, #062b63);"></i>
+                                        <h4 class="mt-3">Loading your papers...</h4>
+                                        <p>Connecting to the question paper database.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -266,7 +246,7 @@
                 <div class="modal-body px-4 py-3 text-center">
                     <div class="text-danger mb-3" style="font-size: 48px;"><i class="bi bi-trash"></i></div>
                     <p>Are you sure you want to delete <strong id="deletePaperTitle"></strong>?</p>
-                    <p class="text-muted small">This action cannot be undone. All download stats will be lost.</p>
+                    <p class="text-muted small">This action cannot be undone. The PDF file and all download stats will be removed.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
@@ -332,415 +312,765 @@ As Principal, he provides academic and administrative leadership to the institut
     </div>
 
     <!-- ================= JAVASCRIPT ================= -->
-    <script>
-        function openLoginModal() { document.getElementById('loginRequiredModal').classList.add('show'); }
-        function closeLoginModal() { document.getElementById('loginRequiredModal').classList.remove('show'); }
+    <script type="module">
+        import { auth, db, storage } from '../firebase-config.js';
+        import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import {
+            collection,
+            deleteDoc,
+            doc,
+            getDoc,
+            getDocs,
+            increment,
+            query,
+            serverTimestamp,
+            updateDoc,
+            where
+        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        import { deleteObject, ref } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
-        function openPrincipalBioModal() { document.getElementById('principalBioModal').classList.add('show'); }
-        function closePrincipalBioModal() { document.getElementById('principalBioModal').classList.remove('show'); }
+        /* ------------------------------------------------------------------
+           State
+        ------------------------------------------------------------------ */
+        const $ = (id) => document.getElementById(id);
 
-        function openCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.add('show'); }
-        function closeCorrespondentBioModal() { document.getElementById('correspondentBioModal').classList.remove('show'); }
+        let currentUser = null;
+        let allPapers = [];
+        let filteredPapers = [];
+        let paperToDelete = null;
+        let bootStarted = false;
 
-        function openChairmanBioModal() { document.getElementById('chairmanBioModal').classList.add('show'); }
-        function closeChairmanBioModal() { document.getElementById('chairmanBioModal').classList.remove('show'); }
+        const courseMap = new Map();
+        const subcourseMap = new Map();
+        const subjectMap = new Map();
+        const yearMap = new Map();
 
-        // Close modals on clicking outside
-        window.addEventListener('click', function (event) {
-            const modals = document.querySelectorAll('.login-modal, .bio-modal');
-            modals.forEach(function (modal) {
-                if (event.target === modal) {
-                    modal.classList.remove('show');
-                }
+        let allCourses = [];
+        let allSubcourses = [];
+        let allSubjects = [];
+        let allYears = [];
+
+        /* ------------------------------------------------------------------
+           Small helpers
+        ------------------------------------------------------------------ */
+        function esc(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[ch]));
+        }
+
+        function truncate(text, max) {
+            const value = String(text || '');
+            return value.length > max ? value.slice(0, max - 1) + '\u2026' : value;
+        }
+
+        function formatBytes(bytes) {
+            const size = Number(bytes);
+            if (!Number.isFinite(size) || size <= 0) return '';
+            if (size < 1024) return size + ' B';
+            if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB';
+            return (size / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function timestampMs(value) {
+            if (!value) return 0;
+            if (typeof value.toDate === 'function') return value.toDate().getTime();
+            if (typeof value.seconds === 'number') return value.seconds * 1000;
+            const parsed = new Date(value).getTime();
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function formatDate(value) {
+            const ms = timestampMs(value);
+            if (!ms) return '\u2014';
+            return new Date(ms).toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        function debounce(fn, wait) {
+            let timer;
+            return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), wait);
+            };
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-check'} me-2"></i>${esc(message)}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        /* ------------------------------------------------------------------
+           Modal helpers (used by inline onclick handlers in the header)
+        ------------------------------------------------------------------ */
+        window.openLoginModal = () => $('loginRequiredModal').classList.add('show');
+        window.closeLoginModal = () => $('loginRequiredModal').classList.remove('show');
+
+        window.openPrincipalBioModal = () => $('principalBioModal').classList.add('show');
+        window.closePrincipalBioModal = () => $('principalBioModal').classList.remove('show');
+
+        window.openCorrespondentBioModal = () => $('correspondentBioModal').classList.add('show');
+        window.closeCorrespondentBioModal = () => $('correspondentBioModal').classList.remove('show');
+
+        window.openChairmanBioModal = () => $('chairmanBioModal').classList.add('show');
+        window.closeChairmanBioModal = () => $('chairmanBioModal').classList.remove('show');
+
+        window.closeDeleteModal = function () {
+            $('deleteModal').classList.remove('show');
+            $('modalBackdrop').classList.remove('show');
+            document.body.style.overflow = '';
+            paperToDelete = null;
+        };
+
+        function openDeleteModal(paper) {
+            if (!paper) return;
+            paperToDelete = paper;
+            $('deletePaperTitle').textContent = paper.title || 'this paper';
+            $('deleteModal').classList.add('show');
+            $('modalBackdrop').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close bio/login modals when clicking outside their box
+        window.addEventListener('click', (event) => {
+            document.querySelectorAll('.login-modal, .bio-modal').forEach((modal) => {
+                if (event.target === modal) modal.classList.remove('show');
             });
         });
 
-        // Load user info in header
-        document.addEventListener('DOMContentLoaded', function() {
-            const user = JSON.parse(sessionStorage.getItem('mt_user') || 'null');
-            if (user) {
-                document.getElementById('headerUserName').textContent = user.name || user.email;
-                document.getElementById('headerUserEmail').textContent = user.email;
-            }
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+            if ($('deleteModal').classList.contains('show')) window.closeDeleteModal();
+            document.querySelectorAll('.login-modal.show, .bio-modal.show').forEach((modal) => {
+                modal.classList.remove('show');
+            });
         });
 
-        // Staff Manage Papers Logic
-        (function() {
-            // Sample data (in real app, fetch from API with user_id filter)
-            let allPapers = [];
+        /* ------------------------------------------------------------------
+           Lookup data: courses, subcourses, subjects, academic years
+           (loaded without composite queries so no extra indexes are needed)
+        ------------------------------------------------------------------ */
+        async function loadLookups() {
+            try {
+                const [coursesSnap, subcoursesSnap, subjectsSnap, yearsSnap] = await Promise.all([
+                    getDocs(collection(db, 'courses')),
+                    getDocs(collection(db, 'subcourses')),
+                    getDocs(collection(db, 'subjects')),
+                    getDocs(collection(db, 'academic_years'))
+                ]);
 
-            let filteredPapers = [];
-            let paperToDelete = null;
+                allCourses = coursesSnap.docs
+                    .map((d) => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => String(a.code || '').localeCompare(String(b.code || '')) || String(a.name || '').localeCompare(String(b.name || '')));
 
-            // Initialize
+                allSubcourses = subcoursesSnap.docs
+                    .map((d) => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+
+                allSubjects = subjectsSnap.docs
+                    .map((d) => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => String(a.code || '').localeCompare(String(b.code || '')) || String(a.name || '').localeCompare(String(b.name || '')));
+
+                allYears = yearsSnap.docs
+                    .map((d) => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => String(b.name || '').localeCompare(String(a.name || '')));
+
+                [courseMap, subcourseMap, subjectMap, yearMap].forEach((map) => map.clear());
+                allCourses.forEach((course) => courseMap.set(course.id, course));
+                allSubcourses.forEach((subcourse) => subcourseMap.set(subcourse.id, subcourse));
+                allSubjects.forEach((subject) => subjectMap.set(subject.id, subject));
+                allYears.forEach((year) => yearMap.set(year.id, year));
+            } catch (err) {
+                console.error('Could not load course lookup data:', err);
+                showToast('Some course details could not be loaded.', 'error');
+            }
+        }
+
+        function populateCourseSelect() {
+            const select = $('course_id');
+            select.innerHTML = '<option value="">All Courses</option>';
+            allCourses.forEach((course) => {
+                const label = course.code ? `${course.code} - ${course.name}` : (course.name || course.id);
+                select.insertAdjacentHTML('beforeend', `<option value="${esc(course.id)}">${esc(label)}</option>`);
+            });
+        }
+
+        function resetSubcourseSelect() {
+            const select = $('subcourse_id');
+            select.innerHTML = '<option value="">All Sub-Courses</option>';
+            select.disabled = true;
+        }
+
+        function resetSubjectSelect() {
+            const select = $('subject_id');
+            select.innerHTML = '<option value="">All Subjects</option>';
+            select.disabled = true;
+        }
+
+        function populateSubcourses(courseId) {
+            const select = $('subcourse_id');
+            select.innerHTML = '<option value="">All Sub-Courses</option>';
+
+            if (!courseId) {
+                select.disabled = true;
+                return;
+            }
+
+            allSubcourses
+                .filter((subcourse) => subcourse.courseId === courseId)
+                .forEach((subcourse) => {
+                    select.insertAdjacentHTML('beforeend', `<option value="${esc(subcourse.id)}">${esc(subcourse.name)}</option>`);
+                });
+
+            select.disabled = false;
+        }
+
+        function populateSubjects(subcourseId) {
+            const select = $('subject_id');
+            select.innerHTML = '<option value="">All Subjects</option>';
+
+            if (!subcourseId) {
+                select.disabled = true;
+                return;
+            }
+
+            const semester = $('semester').value;
+
+            allSubjects
+                .filter((subject) => subject.subcourseId === subcourseId)
+                .filter((subject) => {
+                    if (!semester) return true;
+                    // Subjects seeded without a semester field are shown for every semester.
+                    if (subject.semester == null || subject.semester === '') return true;
+                    return String(subject.semester) === semester;
+                })
+                .forEach((subject) => {
+                    const label = subject.code ? `${subject.code} - ${subject.name}` : (subject.name || subject.id);
+                    select.insertAdjacentHTML('beforeend', `<option value="${esc(subject.id)}">${esc(label)}</option>`);
+                });
+
+            select.disabled = false;
+        }
+
+        function restoreFiltersFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+
+            const semester = params.get('semester');
+            if (semester && ['1', '2', '3', '4', '5', '6'].includes(semester)) {
+                $('semester').value = semester;
+            }
+
+            const courseId = params.get('course_id');
+            if (!courseId || !courseMap.has(courseId)) return;
+
+            $('course_id').value = courseId;
+            populateSubcourses(courseId);
+
+            const subcourseId = params.get('subcourse_id');
+            if (!subcourseId || !subcourseMap.has(subcourseId)) return;
+            if (subcourseMap.get(subcourseId).courseId !== courseId) return;
+
+            $('subcourse_id').value = subcourseId;
+            populateSubjects(subcourseId);
+
+            const subjectId = params.get('subject_id');
+            if (subjectId && subjectMap.has(subjectId) && subjectMap.get(subjectId).subcourseId === subcourseId) {
+                $('subject_id').value = subjectId;
+            }
+        }
+
+        /* ------------------------------------------------------------------
+           Papers: load, filter, render, stats
+        ------------------------------------------------------------------ */
+        async function loadPapers() {
+            setTableLoading();
+
+            try {
+                const snap = await getDocs(
+                    query(collection(db, 'papers'), where('uploadedBy', '==', currentUser.uid))
+                );
+
+                allPapers = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                return true;
+            } catch (err) {
+                console.error('Could not load papers:', err);
+                allPapers = [];
+                setTableError(err);
+                updateStats();
+                return false;
+            }
+        }
+
+        function setTableLoading() {
+            $('paperCount').textContent = '\u2026';
+            $('papersBody').innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-spinner fa-spin" style="font-size: 32px; color: var(--app-primary, #062b63);"></i>
+                            <h4 class="mt-3">Loading your papers...</h4>
+                            <p>Connecting to the question paper database.</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function setTableError(err) {
+            $('paperCount').textContent = '0';
+            $('papersBody').innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-triangle-exclamation" style="color: #dc3545;"></i>
+                            <h4>Could not load your papers</h4>
+                            <p>${esc(err && err.message ? err.message : 'Please check your connection and try again.')}</p>
+                            <button type="button" class="btn btn-outline mt-2" data-action="retry">
+                                <i class="bi bi-arrow-clockwise me-2"></i> Try Again
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function applyFilters() {
+            const courseId = $('course_id').value;
+            const subcourseId = $('subcourse_id').value;
+            const subjectId = $('subject_id').value;
+            const semester = $('semester').value;
+
+            filteredPapers = allPapers.filter((paper) => {
+                if (courseId && paper.courseId !== courseId) return false;
+                if (subcourseId && paper.subcourseId !== subcourseId) return false;
+                if (subjectId && paper.subjectId !== subjectId) return false;
+                if (semester && String(paper.semester ?? '') !== semester) return false;
+                return true;
+            });
+
+            const params = new URLSearchParams();
+            if (courseId) params.set('course_id', courseId);
+            if (subcourseId) params.set('subcourse_id', subcourseId);
+            if (subjectId) params.set('subject_id', subjectId);
+            if (semester) params.set('semester', semester);
+
+            const search = params.toString();
+            window.history.replaceState({}, '', search ? `${window.location.pathname}?${search}` : window.location.pathname);
+
+            renderPapers();
             updateStats();
-            applyFilters();
+        }
 
-            // Load saved filters from URL
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('course_id')) {
-                document.getElementById('course_id').value = urlParams.get('course_id');
-                loadSubcourses(document.getElementById('filterForm'));
+        function renderPapers() {
+            const tbody = $('papersBody');
+            const sortBy = $('sortSelect').value;
+
+            $('paperCount').textContent = filteredPapers.length;
+
+            if (filteredPapers.length === 0) {
+                const noUploads = allPapers.length === 0;
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                ${noUploads ? `
+                                    <i class="fa-solid fa-cloud-upload-alt"></i>
+                                    <h4>No papers uploaded yet</h4>
+                                    <p>Start by uploading your first question paper.</p>
+                                    <a href="upload.html" class="btn btn-accent mt-2"><i class="bi bi-cloud-arrow-up me-2"></i> Upload Paper</a>
+                                ` : `
+                                    <i class="fa-solid fa-filter"></i>
+                                    <h4>No papers match these filters</h4>
+                                    <p>Try changing the course, sub-course, semester or subject.</p>
+                                    <button type="button" class="btn btn-outline mt-2" data-action="reset-filters">
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i> Reset Filters
+                                    </button>
+                                `}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
             }
-            if (urlParams.get('subcourse_id')) {
-                setTimeout(() => {
-                    document.getElementById('subcourse_id').value = urlParams.get('subcourse_id');
-                    loadSubjects(document.getElementById('filterForm'));
-                }, 300);
-            }
-            if (urlParams.get('subject_id')) {
-                setTimeout(() => {
-                    document.getElementById('subject_id').value = urlParams.get('subject_id');
-                    applyFilters();
-                }, 600);
-            }
-            if (urlParams.get('semester')) document.getElementById('semester').value = urlParams.get('semester');
 
-            // Filter form submit
-            document.getElementById('filterForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                applyFilters();
-            });
-
-            // Reset filters
-            document.getElementById('resetFilters').addEventListener('click', function() {
-                document.getElementById('filterForm').reset();
-                document.getElementById('subcourse_id').disabled = true;
-                document.getElementById('subject_id').disabled = true;
-                filteredPapers = [];
-                renderPapers();
-                updateStats();
-            });
-
-            // Sort select
-            document.getElementById('sortSelect').addEventListener('change', function() {
-                renderPapers();
-            });
-
-            // Chained dropdown handlers
-            document.getElementById('course_id').addEventListener('change', function() {
-                loadSubcourses(document.getElementById('filterForm'));
-            });
-
-            document.getElementById('subcourse_id').addEventListener('change', function() {
-                loadSubjects(document.getElementById('filterForm'));
-            });
-
-            document.getElementById('semester').addEventListener('change', function() {
-                loadSubjects(document.getElementById('filterForm'));
-            });
-
-            document.getElementById('semester').addEventListener('change', function() {
-                loadSubjects(document.getElementById('filterForm'));
-            });
-
-            function loadSubcourses(form) {
-                const courseId = form.elements['course_id'].value;
-                const subcourseSelect = form.elements['subcourse_id'];
-                const subjectSelect = form.elements['subject_id'];
-                
-                if (!courseId) {
-                    subcourseSelect.innerHTML = '<option value="">All Sub-Courses</option>';
-                    subcourseSelect.disabled = true;
-                    subjectSelect.innerHTML = '<option value="">All Subjects</option>';
-                    subjectSelect.disabled = true;
-                    return;
+            const sorted = [...filteredPapers].sort((a, b) => {
+                switch (sortBy) {
+                    case 'oldest':
+                        return timestampMs(a.createdAt) - timestampMs(b.createdAt);
+                    case 'downloads':
+                        return (Number(b.downloads) || 0) - (Number(a.downloads) || 0);
+                    case 'title':
+                        return String(a.title || '').localeCompare(String(b.title || ''));
+                    case 'newest':
+                    default:
+                        return timestampMs(b.createdAt) - timestampMs(a.createdAt);
                 }
-                
-                subcourseSelect.innerHTML = '<option value="">Loading...</option>';
-                subcourseSelect.disabled = false;
-                
-                setTimeout(() => {
-                    const subcourses = getSubcourses(courseId);
-                    subcourseSelect.innerHTML = '<option value="">All Sub-Courses</option>';
-                    subcourses.forEach(sc => {
-                        const opt = document.createElement('option');
-                        opt.value = sc.id;
-                        opt.textContent = sc.name;
-                        subcourseSelect.appendChild(opt);
-                    });
-                }, 300);
-            }
+            });
 
-            function loadSubjects(form) {
-                const subcourseId = form.elements['subcourse_id'].value;
-                const subjectSelect = form.elements['subject_id'];
-                const semester = form.elements['semester'] ? form.elements['semester'].value : '';
-                
-                if (!subcourseId) {
-                    subjectSelect.innerHTML = '<option value="">All Subjects</option>';
-                    subjectSelect.disabled = true;
-                    return;
-                }
-                
-                subjectSelect.innerHTML = '<option value="">Loading...</option>';
-                subjectSelect.disabled = false;
-                
-                setTimeout(() => {
-                    const subjects = getSubjects(subcourseId, semester);
-                    subjectSelect.innerHTML = '<option value="">All Subjects</option>';
-                    subjects.forEach(s => {
-                        const opt = document.createElement('option');
-                        opt.value = s.id;
-                        opt.textContent = s.name + (s.semester ? ` (Sem ${s.semester})` : '');
-                        subjectSelect.appendChild(opt);
-                    });
-                }, 300);
-            }
+            tbody.innerHTML = sorted.map((paper) => {
+                const course = courseMap.get(paper.courseId);
+                const subcourse = subcourseMap.get(paper.subcourseId);
+                const subject = subjectMap.get(paper.subjectId);
+                const year = yearMap.get(paper.yearId);
 
-            function applyFilters() {
-                const courseId = document.getElementById('course_id').value;
-                const subcourseId = document.getElementById('subcourse_id').value;
-                const subjectId = document.getElementById('subject_id').value;
-                const semester = document.getElementById('semester').value;
+                const courseLabel = course ? (course.name || course.code) : (paper.courseId || '\u2014');
+                const subcourseLabel = subcourse ? (subcourse.name || '') : '';
+                const subjectLabel = subject
+                    ? [subject.code, subject.name].filter(Boolean).join(' - ')
+                    : (paper.subjectId || 'Unknown subject');
+                const yearLabel = year ? (year.name || year.id) : (paper.yearId || '\u2014');
+                const size = formatBytes(paper.fileSize);
+                const downloads = Number(paper.downloads) || 0;
+                const views = Number(paper.views) || 0;
+                const isActive = paper.status !== 'inactive';
+                const title = paper.title || 'Untitled paper';
 
-                // Update URL
-                const params = new URLSearchParams();
-                if (courseId) params.set('course_id', courseId);
-                if (subcourseId) params.set('subcourse_id', subcourseId);
-                if (subjectId) params.set('subject_id', subjectId);
-                if (semester) params.set('semester', semester);
-                window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
-
-                filteredPapers = allPapers.filter(paper => {
-                    if (courseId && paper.course_id != courseId) return false;
-                    if (subcourseId && paper.subcourse_id != subcourseId) return false;
-                    if (subjectId && paper.subject_id != subjectId) return false;
-                    if (semester && paper.semester != semester) return false;
-                    return true;
-                });
-
-                renderPapers();
-                updateStats();
-            }
-
-            function renderPapers() {
-                const tbody = document.getElementById('papersBody');
-                const countEl = document.getElementById('paperCount');
-                const sortBy = document.getElementById('sortSelect').value;
-
-                countEl.textContent = filteredPapers.length;
-
-                if (filteredPapers.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6">
-                                <div class="empty-state">
-                                    <i class="bi bi-filter"></i>
-                                    <h4>No papers match filters</h4>
-                                    <p>Try adjusting your filters.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                const sorted = [...filteredPapers].sort((a, b) => {
-                    switch (sortBy) {
-                        case 'newest': return b.id - a.id;
-                        case 'oldest': return a.id - b.id;
-                        case 'downloads': return b.downloads - a.downloads;
-                        case 'title': return a.title.localeCompare(b.title);
-                    }
-                });
-
-                tbody.innerHTML = sorted.map(paper => `
+                return `
                     <tr>
                         <td>
-                            <div class="paper-title">${paper.title}</div>
+                            <div class="paper-title">${esc(title)}</div>
                             <div class="paper-meta">
-                                <span><i class="bi bi-tag"></i> ${paper.subject}</span>
-                                <span><i class="bi bi-calendar"></i> ${paper.uploaded_at}</span>
+                                <span><i class="bi bi-calendar"></i> ${esc(formatDate(paper.createdAt))}</span>
+                                ${size ? `<span><i class="bi bi-hdd"></i> ${esc(size)}</span>` : ''}
                             </div>
                         </td>
                         <td>
-                            <span class="badge badge-primary">${paper.course}</span>
-                            ${paper.subcourse !== 'General' ? `<span class="badge badge-info" style="margin-top: 4px; display: inline-block;">${paper.subcourse}</span>` : ''}
+                            <span class="badge badge-primary">${esc(courseLabel)}</span>
+                            ${subcourseLabel ? `<span class="badge badge-info" style="margin-top: 4px; display: inline-block;">${esc(subcourseLabel)}</span>` : ''}
+                            <div class="text-muted" style="font-size: 12px; margin-top: 4px;">${esc(subjectLabel)}</div>
                         </td>
                         <td>
-                            <span>${paper.year}</span><br>
-                            <small>Semester ${paper.semester}</small>
+                            <span>${esc(yearLabel)}</span><br>
+                            <small>Semester ${paper.semester != null && paper.semester !== '' ? esc(paper.semester) : '\u2014'}</small>
                         </td>
                         <td>
-                            <span class="fw-bold">${paper.downloads}</span>
+                            <span class="fw-bold">${downloads}</span>
                             <small class="text-muted"> downloads</small><br>
-                            <small class="text-info">${paper.views} views</small>
+                            <small class="text-info">${views} views</small>
                         </td>
                         <td>
-                            <span class="badge ${paper.status === 'active' ? 'badge-success' : 'badge-secondary'}">
-                                ${paper.status === 'active' ? '<i class="bi bi-check-circle me-1"></i> Active' : '<i class="bi bi-pause-circle me-1"></i> Inactive'}
+                            <span class="badge ${isActive ? 'badge-success' : 'badge-secondary'}">
+                                ${isActive ? '<i class="bi bi-check-circle me-1"></i> Active' : '<i class="bi bi-pause-circle me-1"></i> Inactive'}
                             </span>
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn-icon" onclick="viewPaper(${paper.id})" title="View">
+                                <button type="button" class="btn-icon" data-action="view" data-id="${esc(paper.id)}" title="View paper">
                                     <i class="bi bi-eye"></i>
                                 </button>
-                                <button class="btn-icon" onclick="downloadPaper(${paper.id})" title="Download">
+                                <button type="button" class="btn-icon" data-action="download" data-id="${esc(paper.id)}" title="Download paper">
                                     <i class="bi bi-download"></i>
                                 </button>
-                                <button class="btn-icon" onclick="toggleStatus(${paper.id})" title="Toggle Status">
-                                    <i class="bi ${paper.status === 'active' ? 'bi-pause' : 'bi-play'}"></i>
+                                <button type="button" class="btn-icon" data-action="toggle" data-id="${esc(paper.id)}" title="${isActive ? 'Mark as inactive' : 'Mark as active'}">
+                                    <i class="bi ${isActive ? 'bi-pause' : 'bi-play'}"></i>
                                 </button>
-                                <button class="btn-icon danger" onclick="openDeleteModal(${paper.id})" title="Delete">
+                                <button type="button" class="btn-icon danger" data-action="delete" data-id="${esc(paper.id)}" title="Delete paper">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
-                `).join('');
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const total = allPapers.length;
+            const downloads = allPapers.reduce((sum, paper) => sum + (Number(paper.downloads) || 0), 0);
+            const views = allPapers.reduce((sum, paper) => sum + (Number(paper.views) || 0), 0);
+
+            const top = allPapers.reduce((best, paper) => {
+                if (!best) return paper;
+                return (Number(paper.downloads) || 0) > (Number(best.downloads) || 0) ? paper : best;
+            }, null);
+
+            $('totalUploads').textContent = total;
+            $('totalDownloads').textContent = downloads.toLocaleString('en-IN');
+            $('totalViews').textContent = views.toLocaleString('en-IN');
+            $('topPaper').textContent = top ? truncate(top.title || 'Untitled paper', 22) : '-';
+            $('topPaper').title = top ? (top.title || '') : '';
+        }
+
+        /* ------------------------------------------------------------------
+           Paper actions
+        ------------------------------------------------------------------ */
+        function findPaper(id) {
+            return allPapers.find((paper) => paper.id === id) || null;
+        }
+
+        function storagePathFromUrl(url) {
+            if (!url) return null;
+            try {
+                const parsed = new URL(url);
+                const marker = '/o/';
+                const index = parsed.pathname.indexOf(marker);
+                if (index === -1) return null;
+                return decodeURIComponent(parsed.pathname.slice(index + marker.length));
+            } catch {
+                return null;
+            }
+        }
+
+        function bumpCounter(paper, field) {
+            const nextValue = (Number(paper[field]) || 0) + 1;
+            paper[field] = nextValue;
+            updateDoc(doc(db, 'papers', paper.id), { [field]: increment(1) })
+                .catch((err) => console.warn(`Could not update ${field} for ${paper.id}:`, err));
+            return nextValue;
+        }
+
+        function viewPaper(paper) {
+            if (!paper || !paper.fileUrl) {
+                showToast('The PDF file is not available for this paper.', 'error');
+                return;
             }
 
-            function updateStats() {
-                const total = allPapers.length;
-                const downloads = allPapers.reduce((sum, p) => sum + p.downloads, 0);
-                const views = allPapers.reduce((sum, p) => sum + p.views, 0);
-                const top = allPapers.reduce((max, p) => p.downloads > max.downloads ? p : max, allPapers[0]);
+            window.open(paper.fileUrl, '_blank', 'noopener');
+            bumpCounter(paper, 'views');
+            renderPapers();
+            updateStats();
+        }
 
-                document.getElementById('totalUploads').textContent = total;
-                document.getElementById('totalDownloads').textContent = downloads.toLocaleString();
-                document.getElementById('totalViews').textContent = views.toLocaleString();
-                document.getElementById('topPaper').textContent = top ? top.title.substring(0, 20) + '...' : '-';
+        function downloadPaper(paper) {
+            if (!paper || !paper.fileUrl) {
+                showToast('The PDF file is not available for this paper.', 'error');
+                return;
             }
 
-            // Global functions
-            window.viewPaper = function(id) {
-                const paper = allPapers.find(p => p.id === id);
-                if (paper) {
-                    // Open in new tab
-                    window.open(paper.file_path, '_blank');
-                }
-            };
+            const link = document.createElement('a');
+            link.href = paper.fileUrl;
+            link.download = paper.fileName || 'question-paper.pdf';
+            link.target = '_blank';
+            link.rel = 'noopener';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
 
-            window.downloadPaper = function(id) {
-                const paper = allPapers.find(p => p.id === id);
-                if (!paper) return;
-                
-                paper.downloads++;
-                updateStats();
+            bumpCounter(paper, 'downloads');
+            renderPapers();
+            updateStats();
+            showToast('Download started: ' + (paper.fileName || paper.title || 'question paper'));
+        }
+
+        async function toggleStatus(paper) {
+            if (!paper) return;
+
+            const previous = paper.status;
+            const next = paper.status === 'inactive' ? 'active' : 'inactive';
+
+            paper.status = next;
+            renderPapers();
+
+            try {
+                await updateDoc(doc(db, 'papers', paper.id), {
+                    status: next,
+                    updatedAt: serverTimestamp()
+                });
+                showToast(`Paper marked as ${next}.`);
+            } catch (err) {
+                console.error('Could not update status:', err);
+                paper.status = previous;
                 renderPapers();
-                
-                const a = document.createElement('a');
-                a.href = paper.file_path;
-                a.download = paper.original_name;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                showToast('Download started: ' + paper.original_name);
-            };
+                showToast('Could not update the paper status: ' + err.message, 'error');
+            }
+        }
 
-            window.toggleStatus = function(id) {
-                const paper = allPapers.find(p => p.id === id);
-                if (paper) {
-                    paper.status = paper.status === 'active' ? 'inactive' : 'active';
-                    renderPapers();
-                    showToast(`Paper marked as ${paper.status}`);
+        async function deletePaper() {
+            if (!paperToDelete) return;
+
+            const paper = paperToDelete;
+            const button = $('confirmDeleteBtn');
+            const originalHtml = button.innerHTML;
+
+            button.disabled = true;
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Deleting...';
+
+            try {
+                // 1. Delete the Firestore record
+                await deleteDoc(doc(db, 'papers', paper.id));
+
+                // 2. Delete the PDF from Storage (best effort)
+                const path = storagePathFromUrl(paper.fileUrl);
+                if (path) {
+                    try {
+                        await deleteObject(ref(storage, path));
+                    } catch (storageErr) {
+                        console.warn('Firestore record deleted, but the Storage file could not be removed:', storageErr);
+                    }
                 }
-            };
 
-            window.openDeleteModal = function(id) {
-                const paper = allPapers.find(p => p.id === id);
-                if (paper) {
-                    paperToDelete = id;
-                    document.getElementById('deletePaperTitle').textContent = paper.title;
-                    document.getElementById('deleteModal').classList.add('show');
-                    document.getElementById('modalBackdrop').classList.add('show');
-                    document.body.style.overflow = 'hidden';
-                }
-            };
+                allPapers = allPapers.filter((item) => item.id !== paper.id);
+                window.closeDeleteModal();
+                applyFilters();
+                showToast('Paper deleted successfully.');
+            } catch (err) {
+                console.error('Could not delete paper:', err);
+                showToast('Delete failed: ' + err.message, 'error');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalHtml;
+            }
+        }
 
-            window.closeDeleteModal = function() {
-                document.getElementById('deleteModal').classList.remove('show');
-                document.getElementById('modalBackdrop').classList.remove('show');
-                document.body.style.overflow = '';
-                paperToDelete = null;
-            };
+        /* ------------------------------------------------------------------
+           Events
+        ------------------------------------------------------------------ */
+        function resetFilters() {
+            $('filterForm').reset();
+            $('course_id').value = '';
+            $('semester').value = '';
+            resetSubcourseSelect();
+            resetSubjectSelect();
+            applyFilters();
+        }
 
-            document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-                if (paperToDelete) {
-                    allPapers = allPapers.filter(p => p.id !== paperToDelete);
-                    closeDeleteModal();
-                    renderPapers();
-                    updateStats();
-                    showToast('Paper deleted successfully');
-                }
+        async function onTableClick(event) {
+            const button = event.target.closest('button[data-action]');
+            if (!button) return;
+
+            const action = button.dataset.action;
+            const id = button.dataset.id;
+
+            if (action === 'reset-filters') {
+                resetFilters();
+                return;
+            }
+
+            if (action === 'retry') {
+                const loaded = await loadPapers();
+                if (loaded) applyFilters();
+                return;
+            }
+
+            const paper = findPaper(id);
+            if (!paper) return;
+
+            if (action === 'view') viewPaper(paper);
+            else if (action === 'download') downloadPaper(paper);
+            else if (action === 'toggle') await toggleStatus(paper);
+            else if (action === 'delete') openDeleteModal(paper);
+        }
+
+        function bindEvents() {
+            $('filterForm').addEventListener('submit', (event) => {
+                event.preventDefault();
+                applyFilters();
             });
 
-            function showToast(message) {
-                const toast = document.createElement('div');
-                toast.className = 'toast-notification';
-                toast.innerHTML = `<i class="bi bi-check-circle me-2"></i>${message}`;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.classList.add('show'), 10);
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
+            $('resetFilters').addEventListener('click', resetFilters);
+
+            $('sortSelect').addEventListener('change', renderPapers);
+
+            $('course_id').addEventListener('change', () => {
+                const courseId = $('course_id').value;
+                resetSubjectSelect();
+                if (!courseId) {
+                    resetSubcourseSelect();
+                    return;
+                }
+                populateSubcourses(courseId);
+            });
+
+            $('subcourse_id').addEventListener('change', () => {
+                const subcourseId = $('subcourse_id').value;
+                if (!subcourseId) {
+                    resetSubjectSelect();
+                    return;
+                }
+                populateSubjects(subcourseId);
+            });
+
+            $('semester').addEventListener('change', () => {
+                const subcourseId = $('subcourse_id').value;
+                if (subcourseId) populateSubjects(subcourseId);
+            });
+
+            $('papersBody').addEventListener('click', onTableClick);
+            $('confirmDeleteBtn').addEventListener('click', deletePaper);
+            $('modalBackdrop').addEventListener('click', window.closeDeleteModal);
+
+            // This project uses its own dropdown styles (no Bootstrap JS), so toggle it manually.
+            const userDropdown = $('userDropdown');
+            const userMenu = userDropdown ? userDropdown.parentElement.querySelector('.dropdown-menu') : null;
+            if (userDropdown && userMenu) {
+                userDropdown.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const isOpen = userMenu.classList.toggle('show');
+                    userDropdown.setAttribute('aria-expanded', String(isOpen));
+                });
+
+                document.addEventListener('click', (event) => {
+                    if (!event.target.closest('.dropdown')) {
+                        userMenu.classList.remove('show');
+                        userDropdown.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+        }
+
+        /* ------------------------------------------------------------------
+           Auth + boot
+        ------------------------------------------------------------------ */
+        function renderUser(profile, user) {
+            $('headerUserName').textContent = profile.name || user.email || 'Staff';
+            $('headerUserEmail').textContent = profile.email || user.email || '';
+        }
+
+        async function init() {
+            bindEvents();
+            setTableLoading();
+
+            await loadLookups();
+            populateCourseSelect();
+            restoreFiltersFromUrl();
+
+            const loaded = await loadPapers();
+            if (loaded) {
+                applyFilters();
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.replace('../login.html');
+                return;
             }
 
-            // Mock data functions
-            function getSubcourses(courseId) {
-                const data = {
-                    '1': [{ id: 1, name: 'General' }],
-                    '2': [{ id: 2, name: 'Computer Science' }, { id: 3, name: 'Data Science' }],
-                    '3': [{ id: 4, name: 'General' }],
-                    '4': [{ id: 6, name: 'General' }]
-                };
-                return data[courseId] || [];
-            }
+            if (bootStarted) return;
+            bootStarted = true;
+            currentUser = user;
 
-            function getSubjects(subcourseId, semesterFilter = '') {
-                // Subject data with codes to determine semester
-                // Code pattern: XX1xx = Sem 1, XX2xx = Sem 2, XX3xx = Sem 3, XX4xx = Sem 4
-                const subjectData = {
-                    '1': [ // B.Com General
-                        { id: 1, code: 'CO101', name: 'Financial Accounting' },
-                        { id: 2, code: 'CO102', name: 'Business Laws' },
-                        { id: 3, code: 'CO201', name: 'Corporate Accounting' },
-                        { id: 4, code: 'CO301', name: 'Cost Accounting' },
-                        { id: 5, code: 'CO302', name: 'Taxation' }
-                    ],
-                    '2': [ // Computer Science (B.Sc)
-                        { id: 11, code: 'CS101', name: 'Programming in C' },
-                        { id: 12, code: 'CS201', name: 'Data Structures' },
-                        { id: 13, code: 'CS301', name: 'Database Management Systems' },
-                        { id: 14, code: 'CS401', name: 'Operating Systems' },
-                        { id: 15, code: 'CS402', name: 'Real Analysis' }
-                    ],
-                    '3': [ // Data Science (B.Sc) - new
-                        { id: 16, code: 'DS101', name: 'Introduction to Data Science' },
-                        { id: 17, code: 'DS201', name: 'Machine Learning Fundamentals' },
-                        { id: 18, code: 'DS301', name: 'Deep Learning' },
-                        { id: 19, code: 'DS401', name: 'Big Data Analytics' }
-                    ],
-                    '4': [ // BCA General
-                        { id: 11, code: 'CA101', name: 'Programming in C' },
-                        { id: 12, code: 'CA102', name: 'Digital Computer Fundamentals' },
-                        { id: 12, code: 'CA201', name: 'Data Structures' },
-                        { id: 13, code: 'CA202', name: 'Database Management Systems' },
-                        { id: 13, code: 'CA301', name: 'Operating Systems' },
-                        { id: 14, code: 'CA302', name: 'Computer Networks' },
-                        { id: 14, code: 'CA401', name: 'Web Technologies' },
-                        { id: 14, code: 'CA402', name: 'Software Engineering' }
-                    ],
-                    '6': [ // BBA General
-                        { id: 19, code: 'BB101', name: 'Principles of Management' },
-                        { id: 20, code: 'BB201', name: 'Organisational Behaviour' },
-                        { id: 21, code: 'BB301', name: 'Business Environment' }
-                    ]
-                };
-                
-                const subjects = subjectData[subcourseId] || [];
-                
-                // Add semester property based on code (1xx=1, 2xx=2, 3xx=3, 4xx=4)
-                return subjects.map(s => ({
-                    ...s,
-                    semester: parseInt(s.code.charAt(2)) || null
-                })).filter(s => !semesterFilter || s.semester == semesterFilter);
+            try {
+                const snap = await getDoc(doc(db, 'users', user.uid));
+
+                if (!snap.exists() || snap.data().role !== 'staff') {
+                    await signOut(auth).catch(() => {});
+                    window.location.replace('../login.html');
+                    return;
+                }
+
+                renderUser(snap.data(), user);
+                await init();
+            } catch (err) {
+                console.error('Could not initialise the manage page:', err);
+                showToast('Could not load your account: ' + err.message, 'error');
+                setTableError(err);
             }
-        })();
+        });
     </script>
 
     <style>
@@ -755,9 +1085,9 @@ As Principal, he provides academic and administrative leadership to the institut
             z-index: 1050;
             overflow-y: auto;
         }
-        
+
         .modal.show { display: flex; align-items: center; justify-content: center; padding: 20px; }
-        
+
         .modal-backdrop {
             display: none;
             position: fixed;
@@ -768,9 +1098,9 @@ As Principal, he provides academic and administrative leadership to the institut
             background: rgba(0,0,0,0.5);
             z-index: 1040;
         }
-        
+
         .modal-backdrop.show { display: block; }
-        
+
         .modal-dialog {
             max-width: 400px;
             margin: auto;
@@ -781,11 +1111,11 @@ As Principal, he provides academic and administrative leadership to the institut
             transform: scale(0.9);
             transition: transform 0.2s ease;
         }
-        
+
         .modal.show .modal-dialog { transform: scale(1); }
-        
+
         .modal-content { display: flex; flex-direction: column; }
-        
+
         .modal-header {
             display: flex;
             align-items: center;
@@ -793,7 +1123,7 @@ As Principal, he provides academic and administrative leadership to the institut
             padding: 16px 24px;
             border-bottom: 1px solid var(--app-border);
         }
-        
+
         .modal-header .modal-close {
             background: none;
             border: none;
@@ -808,14 +1138,14 @@ As Principal, he provides academic and administrative leadership to the institut
             justify-content: center;
             transition: all 0.2s;
         }
-        
+
         .modal-header .modal-close:hover {
             background: var(--app-bg);
             color: var(--app-text);
         }
-        
+
         .modal-body { padding: 24px; }
-        
+
         .modal-footer {
             display: flex;
             justify-content: flex-end;
@@ -826,4 +1156,3 @@ As Principal, he provides academic and administrative leadership to the institut
     </style>
 </body>
 </html>
-

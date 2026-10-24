@@ -11,20 +11,21 @@
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-    <!-- Auth check -->
-    <script>
-        (function() {
-            const user = JSON.parse(sessionStorage.getItem('mt_user') || 'null');
-            const loggedIn = sessionStorage.getItem('mt_logged_in') === 'true';
+    <!-- Auth check - Firebase -->
+    <script type="module">
+        import { auth } from './firebase-config.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { db } from './firebase-config.js';
+        import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return window.location.href = 'login.html';
             
-            console.log('Dashboard Auth Check:', { user, loggedIn });
-            
-            if (!loggedIn || !user || user.role !== 'staff') {
-                console.log('Redirecting to login...');
-                sessionStorage.clear();
-                window.location.href = 'login.html?redirect=dashboard.html';
+            const snap = await getDoc(doc(db, 'users', user.uid));
+            if (!snap.exists() || snap.data().role !== 'staff') {
+                return window.location.href = 'login.html';
             }
-        })();
+        });
     </script>
 
     <!-- ================= TOP BAR ================= -->

@@ -162,15 +162,11 @@
     </footer>
 
     <!-- ================= JAVASCRIPT ================= -->
-    <script>
-        // Check if sessionStorage is available (required for login flow)
-        try {
-            sessionStorage.setItem('test', 'test');
-            sessionStorage.removeItem('test');
-        } catch (e) {
-            document.body.innerHTML = '<div class="container text-center py-5"><div class="alert alert-danger"><h4>Server Required</h4><p>This application requires a web server to function properly.</p><p>Please run it through XAMPP, WAMP, or PHP built-in server (<code>php -S localhost:8000</code>), not by opening files directly.</p></div></div>';
-            throw new Error('sessionStorage not available');
-        }
+    <script type="module">
+        import { auth } from './firebase-config.js';
+        import { signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { db } from './firebase-config.js';
+        import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
         function openLoginModal() { document.getElementById('loginRequiredModal').classList.add('show'); }
         function closeLoginModal() { document.getElementById('loginRequiredModal').classList.remove('show'); }
@@ -194,6 +190,19 @@
             });
         });
 
+        // Redirect if already logged in
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const snap = await getDoc(doc(db, 'users', user.uid));
+                if (snap.exists()) {
+                    const role = snap.data().role;
+                    window.location.href = role === 'staff' ? 'staff/upload.html' : 'student/dashboard.html';
+                } else {
+                    window.location.href = 'staff/upload.html'; // fallback
+                }
+            }
+        });
+
         // Show logout message if redirected from logout
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -202,24 +211,8 @@
             }
         });
 
-        // Fill demo credentials
-        window.fillDemo = function(type) {
-            if (type === 'staff') {
-                document.getElementById('roleStaff').checked = true;
-                document.getElementById('email').value = 'staff@demo.com';
-                document.getElementById('password').value = 'Password@123';
-            } else {
-                document.getElementById('roleStudent').checked = true;
-                document.getElementById('email').value = 'student@demo.com';
-                document.getElementById('password').value = 'Password@123';
-            }
-            // Trigger change event for Bootstrap btn-check styling
-            document.getElementById('roleStaff').dispatchEvent(new Event('change'));
-            document.getElementById('roleStudent').dispatchEvent(new Event('change'));
-        };
-
-        // Login form handler
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // Login form handler - Firebase Auth
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             e.stopPropagation();
             
@@ -228,15 +221,11 @@
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Signing in...';
             btn.disabled = true;
 
-            // Get form values directly (more reliable than FormData for btn-check radios)
             const roleInput = document.querySelector('input[name="role"]:checked');
             const role = roleInput ? roleInput.value : 'student';
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
-            console.log('Login attempt:', { role, email, password: '***' });
-
-            // Validate
             if (!email || !password) {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -244,41 +233,26 @@
                 return;
             }
 
-            // Check for redirect parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            const redirect = urlParams.get('redirect');
-
-            // Simulate API call - in real app, this would be a fetch to PHP backend
-            setTimeout(() => {
-                // Demo credentials check
-                const isDemoStaff = email === 'staff@demo.com' && password === 'Password@123';
-                const isDemoStudent = email === 'student@demo.com' && password === 'Password@123';
-                
-                // Check if user exists in localStorage (for registered users)
-                const users = JSON.parse(localStorage.getItem('mt_users') || '[]');
-                const user = users.find(u => u.email === email && u.password === password && u.role === role);
-
-                console.log('Auth check:', { isDemoStaff, isDemoStudent, userFound: !!user });
-
-                if (isDemoStaff || isDemoStudent || user) {
-                    const userData = isDemoStaff ? { email, role: 'staff', name: 'Staff User', verified: true } :
-                                   isDemoStudent ? { email, role: 'student', name: 'Student User', verified: true } :
-                                   user;
-                    
-                    // Store session
-                    sessionStorage.setItem('mt_user', JSON.stringify(userData));
-                    sessionStorage.setItem('mt_logged_in', 'true');
-                    
-                    // Redirect based on role or redirect parameter
-                    const targetUrl = redirect || (role === 'staff' ? 'staff/upload.html' : 'student/dashboard.html');
-                    console.log('Redirecting to:', targetUrl);
-                    window.location.href = targetUrl;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // Redirect handled by onAuthStateChanged above
+            } catch (err) {
+                console.error(err);
+                let msg = 'Login failed. ';
+                if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+                    msg = 'Invalid email or password.';
+                } else if (err.code === 'auth/invalid-email') {
+                    msg = 'Invalid email format.';
+                } else if (err.code === 'auth/too-many-requests') {
+                    msg = 'Too many failed attempts. Please try again later.';
                 } else {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    alert('Invalid credentials. Try demo accounts:\nStaff: staff@demo.com / Password@123\nStudent: student@demo.com / Password@123');
+                    msg += err.message;
                 }
-            }, 800);
+                alert(msg);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         });
     </script>
 
