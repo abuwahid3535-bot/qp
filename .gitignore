@@ -14,3 +14,6 @@ composer.phar
 
 # Local environment overrides
 config/config.local.php
+
+# Destructive local-only seed utility (never deploy)
+seed-data.html

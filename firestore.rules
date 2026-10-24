@@ -1,0 +1,188 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isStaff() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
+    }
+
+    // ------------------------------------------------------------------
+    // User profiles
+    // ------------------------------------------------------------------
+    match /users/{userId} {
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll([
+          'name', 'email', 'role', 'status',
+          'emailVerified', 'mobileVerified', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'name', 'email', 'mobile', 'role', 'status',
+          'emailVerified', 'mobileVerified', 'createdAt'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('.+@.+')
+        && request.resource.data.role in ['staff', 'student']
+        && request.resource.data.status == 'active'
+        && request.resource.data.createdAt is string;
+
+      allow read: if isOwner(userId);
+
+      allow update: if isOwner(userId)
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.createdAt == resource.data.createdAt;
+
+      allow delete: if false;
+    }
+
+    // ------------------------------------------------------------------
+    // Question papers
+    // ------------------------------------------------------------------
+    match /papers/{paperId} {
+      allow read: if isSignedIn();
+
+      allow create: if isStaff()
+        && request.resource.data.keys().hasAll([
+          'title', 'description', 'courseId', 'subcourseId', 'subjectId',
+          'yearId', 'semester', 'fileUrl', 'fileName', 'fileSize',
+          'uploadedBy', 'downloads', 'views', 'status', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'title', 'description', 'courseId', 'subcourseId', 'subjectId',
+          'yearId', 'semester', 'fileUrl', 'fileName', 'fileSize',
+          'uploadedBy', 'downloads', 'views', 'status', 'createdAt'
+        ])
+        && request.resource.data.uploadedBy == request.auth.uid
+        && request.resource.data.status == 'active'
+        && request.resource.data.downloads == 0
+        && request.resource.data.views == 0
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.title is string
+        && request.resource.data.description is string
+        && request.resource.data.courseId is string
+        && request.resource.data.subcourseId is string
+        && request.resource.data.subjectId is string
+        && request.resource.data.yearId is string
+        && request.resource.data.semester is number
+        && request.resource.data.fileUrl is string
+        && request.resource.data.fileName is string
+        && request.resource.data.fileSize is number;
+
+      allow update: if isSignedIn() && (
+        (
+          isStaff()
+          && resource.data.uploadedBy == request.auth.uid
+          && request.resource.data.uploadedBy == resource.data.uploadedBy
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'title', 'description', 'courseId', 'subcourseId', 'subjectId',
+            'yearId', 'semester', 'fileUrl', 'fileName', 'fileSize',
+            'status', 'updatedAt'
+          ])
+        )
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'views', 'downloads'
+        ])
+      );
+
+      allow delete: if isStaff() && resource.data.uploadedBy == request.auth.uid;
+    }
+
+    // ------------------------------------------------------------------
+    // PDF chunks (Firestore storage for the free Spark plan)
+    // ------------------------------------------------------------------
+    match /paper_files/{chunkId} {
+      allow read: if isSignedIn();
+
+      allow create: if isStaff()
+        && request.resource.data.keys().hasAll([
+          'paperId', 'index', 'totalChunks', 'fileName', 'mimeType', 'data'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'paperId', 'index', 'totalChunks', 'fileName', 'mimeType', 'data'
+        ])
+        && request.resource.data.paperId is string
+        && request.resource.data.index is number
+        && request.resource.data.totalChunks is number
+        && request.resource.data.fileName is string
+        && request.resource.data.mimeType is string
+        && request.resource.data.data is string;
+
+      allow delete: if isStaff();
+    }
+
+    // ------------------------------------------------------------------
+    // Lookup data (courses, subcourses, subjects, academic years)
+    // ------------------------------------------------------------------
+    match /courses/{courseId} {
+      allow read: if isSignedIn();
+      allow create, update: if isStaff()
+        && request.resource.data.name is string
+        && request.resource.data.code is string;
+      allow delete: if isStaff();
+    }
+
+    match /subcourses/{subcourseId} {
+      allow read: if isSignedIn();
+      allow create, update: if isStaff()
+        && request.resource.data.courseId is string
+        && request.resource.data.name is string;
+      allow delete: if isStaff();
+    }
+
+    match /subjects/{subjectId} {
+      allow read: if isSignedIn();
+      allow create, update: if isStaff()
+        && request.resource.data.subcourseId is string
+        && request.resource.data.code is string
+        && request.resource.data.name is string;
+      allow delete: if isStaff();
+    }
+
+    match /academic_years/{yearId} {
+      allow read: if isSignedIn();
+      allow create, update: if isStaff()
+        && request.resource.data.name is string;
+      allow delete: if isStaff();
+    }
+
+    // ------------------------------------------------------------------
+    // Student activity
+    // ------------------------------------------------------------------
+    match /downloads/{downloadId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.paperId is string
+        && request.resource.data.keys().hasOnly(['userId', 'paperId', 'createdAt'])
+        && request.resource.data.createdAt == request.time
+        && downloadId == request.auth.uid + '_' + request.resource.data.paperId;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /saved_papers/{savedId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.paperId is string
+        && request.resource.data.keys().hasOnly(['userId', 'paperId', 'createdAt'])
+        && request.resource.data.createdAt == request.time
+        && savedId == request.auth.uid + '_' + request.resource.data.paperId;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

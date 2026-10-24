@@ -71,7 +71,7 @@
                 <h2 class="h5 fw-bold mb-0 text-center"><i class="bi bi-person-plus"></i> Create an Account</h2>
             </div>
             <div class="card-body p-4">
-                <form id="registerForm" novalidate>
+                <form id="registerForm" method="post" onsubmit="event.preventDefault()" novalidate>
                     <input type="hidden" name="csrf_token" value="token">
 
                     <div class="mb-3">
@@ -158,7 +158,12 @@
     <!-- ================= JAVASCRIPT ================= -->
     <script type="module">
         import { auth } from './firebase-config.js';
-        import { createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import {
+            createUserWithEmailAndPassword,
+            deleteUser,
+            sendEmailVerification,
+            signOut
+        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
         import { db } from './firebase-config.js';
         import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
@@ -211,9 +216,12 @@
                 return;
             }
 
+            let cred = null;
+            let profileSaved = false;
+
             try {
                 // 1. Create Firebase Auth user
-                const cred = await createUserWithEmailAndPassword(auth, formData.get('email'), password);
+                cred = await createUserWithEmailAndPassword(auth, formData.get('email'), password);
 
                 // 2. Save profile to Firestore
                 await setDoc(doc(db, 'users', cred.user.uid), {
@@ -227,13 +235,36 @@
                     createdAt: new Date().toISOString()
                 });
 
-                // 3. Send email verification
-                await cred.user.sendEmailVerification();
+                profileSaved = true;
 
-                alert('Registration successful! Please check your email to verify, then login.');
+                // 3. Send email verification (the account is usable even if this fails)
+                try {
+                    await sendEmailVerification(cred.user);
+                } catch (emailErr) {
+                    console.warn('Could not send the verification email:', emailErr);
+                }
+
+                // 4. Sign out so the user goes through the normal login flow
+                try {
+                    await signOut(auth);
+                } catch (signOutErr) {
+                    console.warn('Could not sign out after registration:', signOutErr);
+                }
+
+                alert('Registration successful! Please check your email to verify, then log in.');
                 window.location.href = 'login.html';
             } catch (err) {
                 console.error(err);
+
+                // Do not leave an Auth account without a Firestore profile.
+                if (cred && cred.user && !profileSaved) {
+                    try {
+                        await deleteUser(cred.user);
+                    } catch (cleanupErr) {
+                        console.warn('Could not clean up the incomplete account:', cleanupErr);
+                    }
+                }
+
                 let msg = 'Registration failed. ';
                 if (err.code === 'auth/email-already-in-use') msg = 'Email already registered. Please login.';
                 else if (err.code === 'auth/weak-password') msg = 'Password too weak (minimum 8 characters).';

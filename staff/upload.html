@@ -455,22 +455,17 @@
 
     <!-- ================= JAVASCRIPT ================= -->
     <script type="module">
-        import { auth, db, storage } from '../firebase-config.js';
+        import { auth, db } from '../firebase-config.js';
         import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
         import {
-            addDoc,
             collection,
             doc,
             getDoc,
             getDocs,
-            serverTimestamp
+            serverTimestamp,
+            setDoc
         } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-        import {
-            deleteObject,
-            getDownloadURL,
-            ref,
-            uploadBytesResumable
-        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+        import { deletePaperFile, savePaperFile } from '../paper-files.js';
 
         const $ = (id) => document.getElementById(id);
         const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -615,20 +610,14 @@
             const code = err && err.code ? err.code : '';
 
             switch (code) {
-                case 'storage/unauthorized':
-                    return 'Storage permission denied. Please check your Firebase Storage rules.';
-                case 'storage/canceled':
-                    return 'The upload was cancelled.';
-                case 'storage/retry-limit-exceeded':
-                    return 'The upload timed out. Please try again.';
-                case 'storage/quota-exceeded':
-                    return 'Firebase Storage quota reached. Please try again later.';
                 case 'permission-denied':
-                    return 'You do not have permission to save this paper.';
+                    return 'You do not have permission to save this paper. Make sure you are logged in as staff.';
                 case 'unauthenticated':
                     return 'Your login session expired. Please log in again.';
                 case 'resource-exhausted':
                     return 'Firebase quota reached. Please try again later.';
+                case 'unavailable':
+                    return 'The database is temporarily unavailable. Please try again.';
                 default:
                     return err && err.message ? err.message : 'Upload failed. Please try again.';
             }
@@ -869,41 +858,28 @@
             setProgress(0, 'Starting upload...');
             $('progressWrap').hidden = false;
 
-            let uploadedRef = null;
+            let paperId = null;
             let savedToFirestore = false;
 
             try {
-                const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-                const safeName = cleanName.length > 100 ? cleanName.slice(cleanName.length - 100) : cleanName;
-                const storagePath = `papers/${currentUser.uid}/${Date.now()}_${safeName}`;
-                uploadedRef = ref(storage, storagePath);
+                const paperRef = doc(collection(db, 'papers'));
+                paperId = paperRef.id;
 
-                await new Promise((resolve, reject) => {
-                    const task = uploadBytesResumable(uploadedRef, file, {
-                        contentType: 'application/pdf',
-                        cacheControl: 'public,max-age=31536000'
-                    });
-
-                    task.on(
-                        'state_changed',
-                        (snapshot) => {
-                            const percent = snapshot.totalBytes
-                                ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-                                : 0;
-                            setProgress(percent, `Uploading PDF... ${percent}%`);
-                        },
-                        reject,
-                        resolve
+                await savePaperFile(file, paperId, (percent, done, total) => {
+                    setProgress(
+                        percent,
+                        done < total
+                            ? `Saving PDF... ${percent}% (${done}/${total} parts)`
+                            : 'Saving paper details...'
                     );
                 });
 
                 setProgress(100, 'Saving paper details...');
 
-                const fileUrl = await getDownloadURL(uploadedRef);
                 const semester = Number($('semester').value);
                 const title = $('title').value.trim() || buildAutoTitle() || `Question Paper - ${new Date().getFullYear()}`;
 
-                await addDoc(collection(db, 'papers'), {
+                await setDoc(paperRef, {
                     title,
                     description: $('description').value.trim(),
                     courseId: $('course_id').value,
@@ -911,7 +887,7 @@
                     subjectId: $('subject_id').value,
                     yearId: $('year_id').value,
                     semester,
-                    fileUrl,
+                    fileUrl: `firestore://${paperId}`,
                     fileName: file.name,
                     fileSize: file.size,
                     uploadedBy: currentUser.uid,
@@ -934,13 +910,14 @@
             } catch (err) {
                 console.error('Upload failed:', err);
 
-                // If Storage succeeded but Firestore failed, remove the orphaned file.
-                // Never delete the PDF once the Firestore document has been saved.
-                if (uploadedRef && !savedToFirestore) {
+                // If the PDF chunks were saved but the paper record was not,
+                // remove the orphaned chunks. Never delete the file once the
+                // paper document has been saved.
+                if (paperId && !savedToFirestore) {
                     try {
-                        await deleteObject(uploadedRef);
+                        await deletePaperFile(`firestore://${paperId}`);
                     } catch (cleanupErr) {
-                        console.warn('Could not clean up the uploaded file:', cleanupErr);
+                        console.warn('Could not clean up the uploaded PDF parts:', cleanupErr);
                     }
                 }
 

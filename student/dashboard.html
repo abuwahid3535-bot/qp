@@ -66,7 +66,7 @@
             <div class="header-profiles-right">
                 <div class="dropdown">
                     <button class="btn btn-ghost dropdown-toggle d-flex align-items-center gap-2" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="/assets/img/principal.png" alt="User" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                        <img src="/assets/img/principal.jfif" alt="User" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                         <span class="d-none d-md-inline" id="headerUserName">Student</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
@@ -347,6 +347,7 @@ As Principal, he provides academic and administrative leadership to the institut
             updateDoc,
             where
         } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        import { downloadPaperFile, getPaperBlob } from '../paper-files.js';
 
         /* ------------------------------------------------------------------
            State
@@ -363,6 +364,7 @@ As Principal, he provides academic and administrative leadership to the institut
 
         let downloadedIds = new Set();
         let savedIds = new Set();
+        let previewObjectUrl = null;
 
         const courseMap = new Map();
         const subcourseMap = new Map();
@@ -456,18 +458,40 @@ As Principal, he provides academic and administrative leadership to the institut
             $('viewPaperModal').classList.remove('show');
             $('modalBackdrop').classList.remove('show');
             $('paperIframe').src = '';
+
+            if (previewObjectUrl) {
+                URL.revokeObjectURL(previewObjectUrl);
+                previewObjectUrl = null;
+            }
+
             document.body.style.overflow = '';
         };
 
-        function openViewModal(paper) {
+        async function openViewModal(paper) {
             $('viewModalTitle').textContent = paper.title || 'Question Paper';
-            $('paperIframe').src = paper.fileUrl;
-            $('downloadFromModal').href = paper.fileUrl;
-            $('downloadFromModal').download = paper.fileName || 'question-paper.pdf';
+            $('paperIframe').src = '';
+            $('downloadFromModal').href = '#';
             $('downloadFromModal').dataset.id = paper.id;
             $('viewPaperModal').classList.add('show');
             $('modalBackdrop').classList.add('show');
             document.body.style.overflow = 'hidden';
+
+            if (previewObjectUrl) {
+                URL.revokeObjectURL(previewObjectUrl);
+                previewObjectUrl = null;
+            }
+
+            try {
+                const { blob } = await getPaperBlob(paper);
+
+                if (!$('viewPaperModal').classList.contains('show')) return;
+
+                previewObjectUrl = URL.createObjectURL(blob);
+                $('paperIframe').src = previewObjectUrl;
+            } catch (err) {
+                console.error('Could not load preview:', err);
+                showToast(err.message || 'Could not load the PDF preview.', 'error');
+            }
         }
 
         window.addEventListener('click', (event) => {
@@ -911,44 +935,44 @@ As Principal, he provides academic and administrative leadership to the institut
                 .catch((err) => console.warn('Could not update view count:', err));
         }
 
-        function registerDownload(paper, triggerLink) {
+        async function registerDownload(paper, triggerLink) {
             if (!paper || !paper.fileUrl) {
                 showToast('The PDF file is not available for this paper.', 'error');
                 return;
             }
 
-            if (triggerLink) {
-                const link = document.createElement('a');
-                link.href = paper.fileUrl;
-                link.download = paper.fileName || 'question-paper.pdf';
-                link.target = '_blank';
-                link.rel = 'noopener';
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
+            try {
+                let fileName = paper.fileName;
+
+                if (triggerLink) {
+                    fileName = await downloadPaperFile(paper);
+                }
+
+                paper.downloads = (Number(paper.downloads) || 0) + 1;
+                updateDoc(doc(db, 'papers', paper.id), { downloads: increment(1) })
+                    .catch((err) => console.warn('Could not update download count:', err));
+
+                if (!downloadedIds.has(paper.id)) {
+                    downloadedIds.add(paper.id);
+
+                    setDoc(doc(db, 'downloads', `${uid}_${paper.id}`), {
+                        userId: uid,
+                        paperId: paper.id,
+                        createdAt: serverTimestamp()
+                    }).catch((err) => {
+                        console.warn('Could not save download history:', err);
+                        downloadedIds.delete(paper.id);
+                        updateStats();
+                    });
+                }
+
+                updateStats();
+                renderPapers();
+                showToast('Download started: ' + (fileName || paper.title || 'question paper'));
+            } catch (err) {
+                console.error('Could not download paper:', err);
+                showToast(err.message || 'Could not download the PDF.', 'error');
             }
-
-            paper.downloads = (Number(paper.downloads) || 0) + 1;
-            updateDoc(doc(db, 'papers', paper.id), { downloads: increment(1) })
-                .catch((err) => console.warn('Could not update download count:', err));
-
-            if (!downloadedIds.has(paper.id)) {
-                downloadedIds.add(paper.id);
-
-                setDoc(doc(db, 'downloads', `${uid}_${paper.id}`), {
-                    userId: uid,
-                    paperId: paper.id,
-                    createdAt: serverTimestamp()
-                }).catch((err) => {
-                    console.warn('Could not save download history:', err);
-                    downloadedIds.delete(paper.id);
-                    updateStats();
-                });
-            }
-
-            updateStats();
-            renderPapers();
-            showToast('Download started: ' + (paper.fileName || paper.title || 'question paper'));
         }
 
         async function toggleSave(paper) {
@@ -1090,9 +1114,10 @@ As Principal, he provides academic and administrative leadership to the institut
 
             $('modalBackdrop').addEventListener('click', window.closeViewModal);
 
-            $('downloadFromModal').addEventListener('click', () => {
+            $('downloadFromModal').addEventListener('click', (event) => {
+                event.preventDefault();
                 const paper = findPaper($('downloadFromModal').dataset.id);
-                if (paper) registerDownload(paper, false);
+                if (paper) registerDownload(paper, true);
             });
 
             // This project uses its own dropdown styles (no Bootstrap JS), so toggle it manually.

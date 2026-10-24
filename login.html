@@ -98,7 +98,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
             <div class="card-body p-4">
-                <form id="loginForm" novalidate>
+                <form id="loginForm" method="post" onsubmit="event.preventDefault()" novalidate>
                     <input type="hidden" name="csrf_token" value="token">
                     
                     <div class="mb-3">
