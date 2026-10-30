@@ -1046,10 +1046,21 @@ As Principal, he provides academic and administrative leadership to the institut
 
             try {
                 const snap = await getDoc(doc(db, 'users', user.uid));
+                const role = snap.exists() ? snap.data().role : null;
 
-                if (!snap.exists() || snap.data().role !== 'staff') {
-                    await signOut(auth).catch(() => {});
-                    window.location.replace('../login.html');
+                if (role !== 'staff') {
+                    if (role === 'student') {
+                        window.location.replace('../student/dashboard.html');
+                    } else {
+                        // User profile missing - auto-create with default student role
+                        await setDoc(doc(db, 'users', user.uid), {
+                            name: user.email.split('@')[0],
+                            email: user.email,
+                            role: 'student',
+                            email_verified: user.emailVerified || false,
+                        });
+                        window.location.replace('../student/dashboard.html');
+                    }
                     return;
                 }
 

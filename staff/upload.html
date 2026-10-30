@@ -336,13 +336,6 @@
                                 </select>
                             </div>
 
-                            <div class="filter-group">
-                                <label for="year_id">Academic Year <span class="required-mark">*</span></label>
-                                <select class="form-select" name="year_id" id="year_id" required>
-                                    <option value="">-- Select year --</option>
-                                </select>
-                            </div>
-
                             <div class="filter-group upload-col-3">
                                 <label for="paper_file">Question Paper PDF <span class="required-mark">*</span></label>
                                 <input type="file" class="form-control" id="paper_file" name="paper_file" accept=".pdf,application/pdf" required>
@@ -478,7 +471,6 @@
         let allCourses = [];
         let allSubcourses = [];
         let allSubjects = [];
-        let allYears = [];
 
         /* ------------------------------------------------------------------
            Small helpers
@@ -578,7 +570,6 @@
 
             $('course_id').disabled = busy;
             $('semester').disabled = busy;
-            $('year_id').disabled = busy;
             $('paper_file').disabled = busy;
             $('title').disabled = busy;
             $('description').disabled = busy;
@@ -593,8 +584,6 @@
                 $('subcourse_id').disabled = !$('course_id').value || !hasSubcourses;
                 $('subject_id').disabled = !$('subcourse_id').value || !hasSubjects;
             }
-
-            const cancelBtn = $('cancelBtn');
             if (cancelBtn) {
                 cancelBtn.classList.toggle('disabled', Boolean(busy));
                 cancelBtn.setAttribute('aria-disabled', String(Boolean(busy)));
@@ -627,11 +616,10 @@
            Dropdown data
         ------------------------------------------------------------------ */
         async function loadLookups() {
-            const [coursesSnap, subcoursesSnap, subjectsSnap, yearsSnap] = await Promise.all([
+            const [coursesSnap, subcoursesSnap, subjectsSnap] = await Promise.all([
                 getDocs(collection(db, 'courses')),
                 getDocs(collection(db, 'subcourses')),
-                getDocs(collection(db, 'subjects')),
-                getDocs(collection(db, 'academic_years'))
+                getDocs(collection(db, 'subjects'))
             ]);
 
             allCourses = coursesSnap.docs
@@ -641,14 +629,6 @@
             allSubcourses = subcoursesSnap.docs
                 .map((d) => ({ id: d.id, ...d.data() }))
                 .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
-
-            allSubjects = subjectsSnap.docs
-                .map((d) => ({ id: d.id, ...d.data() }))
-                .sort((a, b) => String(a.code || '').localeCompare(String(b.code || '')) || String(a.name || '').localeCompare(String(b.name || '')));
-
-            allYears = yearsSnap.docs
-                .map((d) => ({ id: d.id, ...d.data() }))
-                .sort((a, b) => String(b.name || '').localeCompare(String(a.name || '')));
         }
 
         function populateCourseSelect() {
@@ -657,14 +637,6 @@
             allCourses.forEach((course) => {
                 const label = [course.code, course.name].filter(Boolean).join(' - ') || course.id;
                 select.insertAdjacentHTML('beforeend', `<option value="${esc(course.id)}">${esc(label)}</option>`);
-            });
-        }
-
-        function populateYearSelect() {
-            const select = $('year_id');
-            select.innerHTML = '<option value="">-- Select year --</option>';
-            allYears.forEach((year) => {
-                select.insertAdjacentHTML('beforeend', `<option value="${esc(year.id)}">${esc(year.name || year.id)}</option>`);
             });
         }
 
@@ -742,13 +714,11 @@
         ------------------------------------------------------------------ */
         function buildAutoTitle() {
             const subject = allSubjects.find((item) => item.id === $('subject_id').value);
-            const year = allYears.find((item) => item.id === $('year_id').value);
             const semester = $('semester').value;
 
             const parts = [];
             if (subject) parts.push(subject.name || subject.code);
             if (semester) parts.push(`Semester ${semester}`);
-            if (year) parts.push(year.name || year.id);
 
             return parts.filter(Boolean).join(' - ');
         }
@@ -757,7 +727,7 @@
             const auto = buildAutoTitle();
             $('titleHelp').textContent = auto
                 ? `Leave blank to use: "${auto}".`
-                : 'Leave blank to auto-generate from the selected subject, semester and year.';
+                : 'Leave blank to auto-generate from the selected subject and semester.';
         }
 
         /* ------------------------------------------------------------------
@@ -771,8 +741,7 @@
                 { id: 'course_id', label: 'Course' },
                 { id: 'subcourse_id', label: 'Sub-Course' },
                 { id: 'semester', label: 'Semester' },
-                { id: 'subject_id', label: 'Subject' },
-                { id: 'year_id', label: 'Academic Year' }
+                { id: 'subject_id', label: 'Subject' }
             ];
 
             const missing = [];
@@ -885,7 +854,6 @@
                     courseId: $('course_id').value,
                     subcourseId: $('subcourse_id').value,
                     subjectId: $('subject_id').value,
-                    yearId: $('year_id').value,
                     semester,
                     fileUrl: `firestore://${paperId}`,
                     fileName: file.name,
@@ -985,12 +953,6 @@
                 refreshTitleHint();
             });
 
-            $('year_id').addEventListener('change', () => {
-                markInvalid($('year_id'), false);
-                hideFormError();
-                refreshTitleHint();
-            });
-
             $('paper_file').addEventListener('change', () => {
                 markInvalid($('paper_file'), false);
                 hideFormError();
@@ -1057,19 +1019,18 @@
             try {
                 await loadLookups();
                 populateCourseSelect();
-                populateYearSelect();
                 resetSubcourseSelect();
                 resetSubjectSelect();
                 refreshTitleHint();
 
                 const submitBtn = $('submitBtn');
-                const missingSetupData = allCourses.length === 0 || allYears.length === 0;
+                const missingSetupData = allCourses.length === 0;
 
                 if (missingSetupData) {
                     formReady = false;
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Setup Required';
-                    showFormError('Course or academic year data is missing. Please contact the administrator to finish setting up the portal.');
+                    showFormError('Course data is missing. Please contact the administrator to finish setting up the portal.');
                 } else {
                     formReady = true;
                     submitBtn.disabled = false;
@@ -1104,8 +1065,14 @@
                     if (role === 'student') {
                         window.location.replace('../student/dashboard.html');
                     } else {
-                        await signOut(auth).catch(() => {});
-                        window.location.replace('../login.html');
+                        // User profile missing - auto-create with default student role
+                        await setDoc(doc(db, 'users', user.uid), {
+                            name: user.email.split('@')[0],
+                            email: user.email,
+                            role: 'student',
+                            email_verified: user.emailVerified || false,
+                        });
+                        window.location.replace('../student/dashboard.html');
                     }
                     return;
                 }

@@ -102,9 +102,7 @@
                 <h3>B.Com</h3>
                 <p>Commerce, accounting and business related previous year question papers.</p>
                 <div class="course-dropdown">
-                    <a href="student/dashboard.html?course_id=3&subcourse_id=8" class="dropdown-item"><i class="fa-solid fa-book"></i> General</a>
-                    <a href="student/dashboard.html?course_id=3&subcourse_id=9" class="dropdown-item"><i class="fa-solid fa-laptop"></i> Computers</a>
-                    <a href="student/dashboard.html?course_id=3&subcourse_id=10" class="dropdown-item"><i class="fa-solid fa-calculator"></i> Accounting & Finance</a>
+                    <a href="student/dashboard.html?course_id=bcom&subcourse_id=bcom-general" class="dropdown-item"><i class="fa-solid fa-book"></i> General</a>
                 </div>
             </div>
             <div class="card position-relative">
@@ -112,12 +110,8 @@
                 <h3>B.Sc</h3>
                 <p>Science subjects and previous examination question papers.</p>
                 <div class="course-dropdown">
-                    <a href="student/dashboard.html?course_id=1&subcourse_id=1" class="dropdown-item"><i class="fa-solid fa-atom"></i> Physics</a>
-                    <a href="student/dashboard.html?course_id=1&subcourse_id=2" class="dropdown-item"><i class="fa-solid fa-flask"></i> Chemistry</a>
-                    <a href="student/dashboard.html?course_id=1&subcourse_id=3" class="dropdown-item"><i class="fa-solid fa-square-root-variable"></i> Mathematics</a>
-                    <a href="student/dashboard.html?course_id=1&subcourse_id=4" class="dropdown-item"><i class="fa-solid fa-laptop-code"></i> Computer Science</a>
-                    <a href="student/dashboard.html?course_id=1&subcourse_id=5" class="dropdown-item"><i class="fa-solid fa-leaf"></i> Botany</a>
-                    <a href="student/dashboard.html?course_id=1&subcourse_id=6" class="dropdown-item"><i class="fa-solid fa-chart-line"></i> Statistics</a>
+                    <a href="student/dashboard.html?course_id=bsc&subcourse_id=bsc-computer-science" class="dropdown-item"><i class="fa-solid fa-laptop-code"></i> Computer Science</a>
+                    <a href="student/dashboard.html?course_id=bsc&subcourse_id=bsc-data-science" class="dropdown-item"><i class="fa-solid fa-chart-line"></i> Data Science</a>
                 </div>
             </div>
             <div class="card position-relative">
@@ -125,7 +119,7 @@
                 <h3>BCA</h3>
                 <p>Computer applications, programming and technology question papers.</p>
                 <div class="course-dropdown">
-                    <a href="student/dashboard.html?course_id=2&subcourse_id=7" class="dropdown-item"><i class="fa-solid fa-code"></i> General</a>
+                    <a href="student/dashboard.html?course_id=bca&subcourse_id=bca-general" class="dropdown-item"><i class="fa-solid fa-code"></i> General</a>
                 </div>
             </div>
             <div class="card position-relative">
@@ -133,10 +127,7 @@
                 <h3>BBA</h3>
                 <p>Business administration and management question papers.</p>
                 <div class="course-dropdown">
-                    <a href="student/dashboard.html?course_id=4&subcourse_id=11" class="dropdown-item"><i class="fa-solid fa-building"></i> General</a>
-                    <a href="student/dashboard.html?course_id=4&subcourse_id=12" class="dropdown-item"><i class="fa-solid fa-bullhorn"></i> Marketing</a>
-                    <a href="student/dashboard.html?course_id=4&subcourse_id=13" class="dropdown-item"><i class="fa-solid fa-chart-line"></i> Finance</a>
-                    <a href="student/dashboard.html?course_id=4&subcourse_id=14" class="dropdown-item"><i class="fa-solid fa-users"></i> Human Resources</a>
+                    <a href="student/dashboard.html?course_id=bba&subcourse_id=bba-general" class="dropdown-item"><i class="fa-solid fa-building"></i> General</a>
                 </div>
             </div>
         </div>
@@ -145,35 +136,32 @@
     <!-- ================= QUESTION PAPERS ================= -->
     <section class="section papers" id="papers">
         <div class="section-title">
-            <h2>Recent Question Papers</h2>
-            <p>Access recently uploaded examination papers.</p>
+            <h2>Question Paper Portal</h2>
+            <p>Sign in to access the paper library.</p>
         </div>
         <div class="paper-grid">
             <div class="paper">
-                <div class="paper-icon"><i class="fa-solid fa-file-code"></i></div>
-                <h3>Web Technology</h3>
-                <p>BCA - Semester 4 (2024)</p>
+                <div class="paper-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                <h3>Students</h3>
+                <p>Login to browse, preview, download, and bookmark question papers.</p>
                 <div class="paper-buttons">
-                    <button class="btn btn-primary btn-sm" onclick="openLoginModal()"><i class="fa-solid fa-eye"></i> View</button>
-                    <button class="btn btn-accent btn-sm" onclick="openLoginModal()"><i class="fa-solid fa-download"></i> Download</button>
+                    <a href="login.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-right-to-bracket"></i> Student Login</a>
                 </div>
             </div>
             <div class="paper">
-                <div class="paper-icon"><i class="fa-solid fa-calculator"></i></div>
-                <h3>Financial Accounting</h3>
-                <p>B.Com - Semester 1 (2024)</p>
+                <div class="paper-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+                <h3>Staff</h3>
+                <p>Login to upload and manage question papers for your courses.</p>
                 <div class="paper-buttons">
-                    <button class="btn btn-primary btn-sm" onclick="openLoginModal()"><i class="fa-solid fa-eye"></i> View</button>
-                    <button class="btn btn-accent btn-sm" onclick="openLoginModal()"><i class="fa-solid fa-download"></i> Download</button>
+                    <a href="login.html" class="btn btn-accent btn-sm"><i class="fa-solid fa-upload"></i> Staff Login</a>
                 </div>
             </div>
             <div class="paper">
-                <div class="paper-icon"><i class="fa-solid fa-atom"></i></div>
-                <h3>Physics - I</h3>
-                <p>B.Sc - Semester 2 (2023)</p>
+                <div class="paper-icon"><i class="fa-solid fa-user-plus"></i></div>
+                <h3>New here?</h3>
+                <p>Create a free account as a student or staff member to get started.</p>
                 <div class="paper-buttons">
-                    <button class="btn btn-primary btn-sm" onclick="openLoginModal()"><i class="fa-solid fa-eye"></i> View</button>
-                    <button class="btn btn-accent btn-sm" onclick="openLoginModal()"><i class="fa-solid fa-download"></i> Download</button>
+                    <a href="register.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-user-plus"></i> Register</a>
                 </div>
             </div>
         </div>
