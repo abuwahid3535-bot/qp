@@ -629,6 +629,10 @@
             allSubcourses = subcoursesSnap.docs
                 .map((d) => ({ id: d.id, ...d.data() }))
                 .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+
+            allSubjects = subjectsSnap.docs
+                .map((d) => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => String(a.code || '').localeCompare(String(b.code || '')) || String(a.name || '').localeCompare(String(b.name || '')));
         }
 
         function populateCourseSelect() {
