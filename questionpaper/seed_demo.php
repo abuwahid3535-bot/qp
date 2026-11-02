@@ -56,6 +56,44 @@ if (!$staffId) {
     exit(1);
 }
 
+// ---- General English subjects for all subcourses (Sem 1 & 2) ------
+$english = [
+    1  => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    2  => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    3  => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    4  => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    5  => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    6  => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    7  => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    8  => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    9  => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    10 => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    11 => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    12 => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    13 => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+    14 => ['ENG101', 'General English – Semester 1', 'ENG102', 'General English – Semester 2'],
+];
+
+echo "\nSeeding General English subjects...\n\n";
+
+$checkSubj = db()->prepare('SELECT id FROM subjects WHERE subcourse_id = ? AND name = ? LIMIT 1');
+$insSubj   = db()->prepare(
+    'INSERT INTO subjects (subcourse_id, code, name) VALUES (?, ?, ?)'
+);
+
+foreach ($english as $subcourseId => $pair) {
+    [$code1, $name1, $code2, $name2] = $pair;
+    foreach ([$code1 => $name1, $code2 => $name2] as $code => $name) {
+        $checkSubj->execute([$subcourseId, $name]);
+        if ($checkSubj->fetch()) {
+            echo "SKIP  $name (subcourse_id=$subcourseId, already exists)\n";
+            continue;
+        }
+        $insSubj->execute([$subcourseId, $code, $name]);
+        echo "OK    $name  ->  subcourse_id=$subcourseId\n";
+    }
+}
+
 // ---- Sample question paper records (only if not already present) ------
 $samples = [
     [2, 7, 19, 5, 1, 'Programming in C - Semester End Examination - 2024-2025',     'uploads/demo_ca101.pdf', 'demo_ca101.pdf'],
