@@ -58,25 +58,23 @@ service cloud.firestore {
       allow create: if isStaff()
         && request.resource.data.keys().hasAll([
           'title', 'description', 'courseId', 'subcourseId', 'subjectId',
-          'yearId', 'semester', 'fileUrl', 'fileName', 'fileSize',
+          'semester', 'fileUrl', 'fileName', 'fileSize',
           'uploadedBy', 'downloads', 'views', 'status', 'createdAt'
         ])
         && request.resource.data.keys().hasOnly([
           'title', 'description', 'courseId', 'subcourseId', 'subjectId',
-          'yearId', 'semester', 'fileUrl', 'fileName', 'fileSize',
+          'semester', 'fileUrl', 'fileName', 'fileSize',
           'uploadedBy', 'downloads', 'views', 'status', 'createdAt'
         ])
         && request.resource.data.uploadedBy == request.auth.uid
         && request.resource.data.status == 'active'
         && request.resource.data.downloads == 0
         && request.resource.data.views == 0
-        && request.resource.data.createdAt == request.time
         && request.resource.data.title is string
         && request.resource.data.description is string
         && request.resource.data.courseId is string
         && request.resource.data.subcourseId is string
         && request.resource.data.subjectId is string
-        && request.resource.data.yearId is string
         && request.resource.data.semester is number
         && request.resource.data.fileUrl is string
         && request.resource.data.fileName is string
