@@ -337,6 +337,7 @@
                                     <option value="ge_sem2">ENG102 - General English – Semester 2</option>
                                     <option value="gt_sem1">TEL101 - General Telugu – Semester 1</option>
                                     <option value="gt_sem2">TEL102 - General Telugu – Semester 2</option>
+                                    <option value="adv_sem1">ADV101 - Advanced Computer Science – Semester 1</option>
                                 </select>
                             </div>
 
@@ -741,6 +742,23 @@
                 const label = [subject.code, subject.name].filter(Boolean).join(' - ');
                 select.insertAdjacentHTML('beforeend', `<option value="${esc(subject.id)}">${esc(label)}</option>`);
             });
+
+            // Advance subject (B.Sc Computer Science only, Semester 1)
+            const subcourse = allSubcourses.find((s) => s.id === subcourseId);
+            const isBScCS = subcourse && String(subcourse.name || '').trim().toLowerCase() === 'computer science';
+            if (isBScCS) {
+                const advSubjects = [
+                    { id: `adv_${subcourseId}_1`, code: 'ADV101', name: 'Advanced Computer Science – Semester 1', semester: '1' },
+                ];
+                const advMatches = advSubjects.filter((subject) => {
+                    if (!semester) return true;
+                    return String(subject.semester) === semester;
+                });
+                advMatches.forEach((subject) => {
+                    const label = [subject.code, subject.name].filter(Boolean).join(' - ');
+                    select.insertAdjacentHTML('beforeend', `<option value="${esc(subject.id)}">${esc(label)}</option>`);
+                });
+            }
 
             select.disabled = false;
         }
