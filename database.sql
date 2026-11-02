@@ -188,6 +188,37 @@ INSERT INTO subjects (id, subcourse_id, code, name) VALUES
 (43, 14, 'BH201', 'Human Resource Management'),
 (44, 14, 'BH301', 'Industrial Relations');
 
+-- General English (compulsory paper for all UG courses, Semester 1 & 2) ----------
+INSERT INTO subjects (id, subcourse_id, code, name) VALUES
+(45,  1, 'ENG101', 'General English – Semester 1'),
+(46,  1, 'ENG102', 'General English – Semester 2'),
+(47,  2, 'ENG101', 'General English – Semester 1'),
+(48,  2, 'ENG102', 'General English – Semester 2'),
+(49,  3, 'ENG101', 'General English – Semester 1'),
+(50,  3, 'ENG102', 'General English – Semester 2'),
+(51,  4, 'ENG101', 'General English – Semester 1'),
+(52,  4, 'ENG102', 'General English – Semester 2'),
+(53,  5, 'ENG101', 'General English – Semester 1'),
+(54,  5, 'ENG102', 'General English – Semester 2'),
+(55,  6, 'ENG101', 'General English – Semester 1'),
+(56,  6, 'ENG102', 'General English – Semester 2'),
+(57,  7, 'ENG101', 'General English – Semester 1'),
+(58,  7, 'ENG102', 'General English – Semester 2'),
+(59,  8, 'ENG101', 'General English – Semester 1'),
+(60,  8, 'ENG102', 'General English – Semester 2'),
+(61,  9, 'ENG101', 'General English – Semester 1'),
+(62,  9, 'ENG102', 'General English – Semester 2'),
+(63, 10, 'ENG101', 'General English – Semester 1'),
+(64, 10, 'ENG102', 'General English – Semester 2'),
+(65, 11, 'ENG101', 'General English – Semester 1'),
+(66, 11, 'ENG102', 'General English – Semester 2'),
+(67, 12, 'ENG101', 'General English – Semester 1'),
+(68, 12, 'ENG102', 'General English – Semester 2'),
+(69, 13, 'ENG101', 'General English – Semester 1'),
+(70, 13, 'ENG102', 'General English – Semester 2'),
+(71, 14, 'ENG101', 'General English – Semester 1'),
+(72, 14, 'ENG102', 'General English – Semester 2');
+
 -- Academic years -----------------------------------------------------------------
 INSERT INTO academic_years (id, name) VALUES
 (1, '2020-2021'),
