@@ -9,6 +9,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .password-requirements {
+            font-size: 0.75rem;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-top: 6px;
+        }
+        .requirement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+        .requirement:last-child { margin-bottom: 0; }
+        .requirement.valid { color: #198754; }
+        .requirement.invalid { color: #dc3545; }
+    </style>
 </head>
 <body>
 
@@ -114,22 +133,28 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold" for="password">Password</label>
                             <div class="input-group">
-                                <input type="password" class="form-control" id="password" name="password" minlength="8" required>
+                                <input type="password" class="form-control" id="password" name="password" minlength="8" maxlength="13" required>
                                 <span class="input-group-text" style="cursor:pointer;" onclick="togglePassword('password', this)">
                                     <i class="bi bi-eye"></i>
                                 </span>
+                            </div>
+                            <div id="passwordRequirements" class="password-requirements" style="display:none;">
+                                <div class="requirement invalid" id="reqLength"><i class="bi bi-dash-circle me-2"></i> 8 to 13 characters</div>
+                                <div class="requirement invalid" id="reqUpper"><i class="bi bi-dash-circle me-2"></i> 1 uppercase letter (A-Z)</div>
+                                <div class="requirement invalid" id="reqNumber"><i class="bi bi-dash-circle me-2"></i> 1 number (0-9)</div>
+                                <div class="requirement invalid" id="reqSpecial"><i class="bi bi-dash-circle me-2"></i> 1 special character (!@#$%^&*)</div>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold" for="confirm_password">Confirm password</label>
                             <div class="input-group">
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="8" required>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="8" maxlength="13" required>
                                 <span class="input-group-text" style="cursor:pointer;" onclick="togglePassword('confirm_password', this)">
                                     <i class="bi bi-eye"></i>
                                 </span>
                             </div>
+                            <div class="form-text mt-n2 text-muted">Must match the password above.</div>
                         </div>
-                        <div class="form-text mt-n2">Minimum 8 characters.</div>
                     </div>
 
                     <div class="d-grid mt-3">
@@ -219,10 +244,28 @@
                 return;
             }
 
-            if (password.length < 8) {
+            if (password.length < 8 || password.length > 13) {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-                alert('Password must be at least 8 characters!');
+                alert('Password must be between 8 and 13 characters!');
+                return;
+            }
+            if (!/[A-Z]/.test(password)) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('Password must contain at least 1 uppercase letter.');
+                return;
+            }
+            if (!/[0-9]/.test(password)) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('Password must contain at least 1 number.');
+                return;
+            }
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('Password must contain at least 1 special character.');
                 return;
             }
 
@@ -284,6 +327,52 @@
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
+            }
+        });
+
+        // Password strength requirements (real-time)
+        function setReq(el, ok) {
+            if (ok) {
+                el.classList.remove('invalid', 'text-danger');
+                el.classList.add('valid', 'text-success');
+                el.querySelector('i').className = 'bi bi-check-circle text-success me-2';
+            } else {
+                el.classList.remove('valid', 'text-success');
+                el.classList.add('invalid', 'text-danger');
+                el.querySelector('i').className = 'bi bi-dash-circle text-danger me-2';
+            }
+        }
+
+        function updatePasswordRequirements() {
+            const password = document.getElementById('password').value;
+            const box = document.getElementById('passwordRequirements');
+
+            if (password.length === 0) {
+                box.style.display = 'none';
+                return;
+            }
+            box.style.display = 'block';
+
+            const lenOk = password.length >= 8 && password.length <= 13;
+            const upperOk = /[A-Z]/.test(password);
+            const numOk = /[0-9]/.test(password);
+            const specialOk = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+            setReq(document.getElementById('reqLength'), lenOk);
+            setReq(document.getElementById('reqUpper'), upperOk);
+            setReq(document.getElementById('reqNumber'), numOk);
+            setReq(document.getElementById('reqSpecial'), specialOk);
+        }
+
+        document.getElementById('password').addEventListener('input', function () {
+            updatePasswordRequirements();
+            const confirm = document.getElementById('confirm_password');
+            if (confirm.value) {
+                if (confirm.value !== this.value) {
+                    confirm.setCustomValidity('Passwords do not match');
+                } else {
+                    confirm.setCustomValidity('');
+                }
             }
         });
 
