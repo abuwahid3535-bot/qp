@@ -333,6 +333,8 @@
                                 <label for="subject_id">Subject <span class="required-mark">*</span></label>
                                 <select class="form-select" name="subject_id" id="subject_id" required disabled>
                                     <option value="">-- Select subject --</option>
+                                    <option value="ge_sem1">ENG101 - General English – Semester 1</option>
+                                    <option value="ge_sem2">ENG102 - General English – Semester 2</option>
                                 </select>
                             </div>
 
@@ -707,6 +709,20 @@
 
             matches.forEach((subject) => {
                 const label = [subject.code, subject.name].filter(Boolean).join(' - ') || subject.id;
+                select.insertAdjacentHTML('beforeend', `<option value="${esc(subject.id)}">${esc(label)}</option>`);
+            });
+
+            // General English (compulsory) for Semester 1 & 2 — all subcourses
+            const geSubjects = [
+                { id: `ge_${subcourseId}_1`, code: 'ENG101', name: 'General English – Semester 1', semester: '1' },
+                { id: `ge_${subcourseId}_2`, code: 'ENG102', name: 'General English – Semester 2', semester: '2' },
+            ];
+            const geMatches = geSubjects.filter((subject) => {
+                if (!semester) return true;
+                return String(subject.semester) === semester;
+            });
+            geMatches.forEach((subject) => {
+                const label = [subject.code, subject.name].filter(Boolean).join(' - ');
                 select.insertAdjacentHTML('beforeend', `<option value="${esc(subject.id)}">${esc(label)}</option>`);
             });
 
