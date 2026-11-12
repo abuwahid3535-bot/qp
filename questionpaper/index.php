@@ -5,7 +5,8 @@ require_once __DIR__ . '/includes/header.php';
 
 $principalImg = __DIR__ . '/' . PRINCIPAL_PHOTO;
 $corrImg      = __DIR__ . '/' . CORRESPONDENT_PHOTO;
-$collegeImg   = __DIR__ . '/' . COLLEGE_IMAGE;
+$chairImg     = __DIR__ . '/' . CHAIRMAN_PHOTO;
+$advisorImg   = __DIR__ . '/' . ACADEMIC_ADVISOR_PHOTO;
 ?>
 
 <div class="hero mb-4">
@@ -28,12 +29,26 @@ $collegeImg   = __DIR__ . '/' . COLLEGE_IMAGE;
             </div>
         </div>
         <div class="col-lg-5 text-center d-none d-lg-block">
-            <?php if (is_file($collegeImg)): ?>
-                <img src="<?= COLLEGE_IMAGE; ?>" alt="<?= e(COLLEGE_NAME); ?>"
-                     class="img-fluid rounded-4 shadow-lg" style="max-height:280px;object-fit:cover;">
-            <?php else: ?>
-                <i class="bi bi-file-earmark-pdf-fill" style="font-size:9rem;opacity:.9;"></i>
-            <?php endif; ?>
+            <div class="d-flex justify-content-center gap-3 mb-3 flex-wrap">
+                <?php if (is_file($corrImg)): ?>
+                    <img src="<?= CORRESPONDENT_PHOTO; ?>" alt="<?= e(CORRESPONDENT_NAME); ?>"
+                         class="img-fluid rounded-4 shadow-lg" style="max-height:280px;object-fit:cover;max-width:32%;">
+                <?php else: ?>
+                    <i class="bi bi-person-circle leadership-icon" style="font-size:9rem;opacity:.9;"></i>
+                <?php endif; ?>
+                <?php if (is_file($chairImg)): ?>
+                    <img src="<?= CHAIRMAN_PHOTO; ?>" alt="Chairman"
+                         class="img-fluid rounded-4 shadow-lg" style="max-height:280px;object-fit:cover;max-width:32%;">
+                <?php else: ?>
+                    <i class="bi bi-person-circle leadership-icon" style="font-size:9rem;opacity:.9;"></i>
+                <?php endif; ?>
+                <?php if (is_file($advisorImg)): ?>
+                    <img src="<?= ACADEMIC_ADVISOR_PHOTO; ?>" alt="Academic Advisor"
+                         class="img-fluid rounded-4 shadow-lg" style="max-height:280px;object-fit:cover;max-width:32%;">
+                <?php else: ?>
+                    <i class="bi bi-person-circle leadership-icon" style="font-size:9rem;opacity:.9;"></i>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>

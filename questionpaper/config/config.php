@@ -10,6 +10,18 @@
 define('APP_NAME', 'QP Portal');
 define('APP_TAGLINE', 'Question Paper Management System');
 
+// Leadership names
+define('COLLEGE_NAME', 'Government College');
+define('PRINCIPAL_NAME', 'Dr. Principal Name');
+define('CORRESPONDENT_NAME', 'Correspondent Name');
+
+// Leadership photo paths (relative to questionpaper/ folder)
+define('COLLEGE_IMAGE', 'assets/img/college.jpg');
+define('PRINCIPAL_PHOTO', 'assets/img/principal.png');
+define('CORRESPONDENT_PHOTO', 'assets/img/correspondent.jpg');
+define('CHAIRMAN_PHOTO', 'assets/img/chairman.jpg');
+define('ACADEMIC_ADVISOR_PHOTO', 'assets/img/Academic advisor.jpeg');
+
 // Directory where uploaded PDF files are stored (filesystem path).
 define('UPLOAD_DIR', __DIR__ . '/../uploads');
 // Allowed upload size in bytes (default 10 MB).
